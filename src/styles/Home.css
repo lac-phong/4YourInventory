@@ -1,0 +1,53 @@
+img {
+    width: 700px;
+  }
+
+.imageCont{
+    margin-top: 50px;
+    text-align: center;
+}
+
+.searchBar {
+    margin-top: 70px;
+    margin-bottom: 100px;
+    text-align: center;
+}
+
+.searchBar form {
+    display: inline-block;
+}
+
+.searchBar input[type="text"] {
+    padding: 10px;
+    font-size: 16px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    margin-right: 10px;
+    width: 300px; /* Adjust width as needed */
+}
+
+.searchBar input[type="submit"] {
+    padding: 10px 20px;
+    font-size: 16px;
+    color: white;
+    background-color: #2C9A39; /* Adjust color as needed */
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.searchBar input[type="submit"]:hover {
+    background-color: #0056b3; /* Adjust color for hover effect */
+}
+
+@media only screen and (max-width: 900px) {
+    img {
+        width: 400px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    img {
+        width: 300px;
+    }
+}
