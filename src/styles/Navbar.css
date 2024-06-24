@@ -67,6 +67,16 @@
     width: 70px;
     margin: 5px;
   }
+
+  a:hover {
+    color: #7FFB8F;
+  }
+
+  .navbar .rightSide .logout-link,
+  .navbar .leftSide .logout-link {
+    color: rgb(103, 201, 246) !important; 
+  }
+
   @media only screen and (max-width: 900px) {
     .navbar .rightSide a {
       width: 70px;
