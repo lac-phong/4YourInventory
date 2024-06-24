@@ -8,7 +8,7 @@ img {
 }
 
 .searchBar {
-    margin-top: 70px;
+    margin-top: 60px;
     margin-bottom: 100px;
     text-align: center;
 }
@@ -37,7 +37,7 @@ img {
 }
 
 .searchBar input[type="submit"]:hover {
-    background-color: #0056b3; /* Adjust color for hover effect */
+    background-color: #177305; /* Adjust color for hover effect */
 }
 
 @media only screen and (max-width: 900px) {
