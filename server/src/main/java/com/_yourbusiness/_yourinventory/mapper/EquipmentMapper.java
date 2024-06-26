@@ -7,21 +7,17 @@ public class EquipmentMapper {
 
     public static EquipmentDto mapToEquipmentDto(Equipment equipment) {
         return new EquipmentDto(
+                equipment.getId(),
                 equipment.getPartNumber(),
-                equipment.getName(),
                 equipment.getQuantity(),
-                equipment.getQuantityOnEbay(),
                 equipment.getQuantitySold(),
-                equipment.getLocations(),
-                equipment.getLastSoldDate()
+                equipment.getLocations()
         );
     }
 
     public static Equipment mapToEquipment(EquipmentDto equipmentDto) {
         return new Equipment(
-                equipmentDto.getName(),
-                equipmentDto.getQuantityOnEbay(),
-                equipmentDto.getLastSoldDate(),
+                equipmentDto.getId(),
                 equipmentDto.getPartNumber(),
                 equipmentDto.getQuantity(),
                 equipmentDto.getQuantitySold(),

@@ -16,13 +16,12 @@ import java.util.Date;
 @Entity
 @Table(name = "parts")
 public class Equipment {
-
-    private String name;
-    private int quantityOnEbay;
-    private Date lastSoldDate;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Column(name = "part_number")
-    private Long partNumber;
+    private String partNumber;
 
     @Column(name = "quantity")
     private int quantity;
@@ -30,6 +29,6 @@ public class Equipment {
     @Column(name = "quantity_sold")
     private int quantitySold;
 
-    @Column(name = "locations")
+    @Column(name = "locations", columnDefinition = "TEXT")
     private String locations;
 }
