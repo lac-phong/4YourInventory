@@ -12,11 +12,9 @@ import java.util.Date;
 @NoArgsConstructor
 @AllArgsConstructor
 public class EquipmentDto {
-    private Long partNumber;
-    private String name;
+    private Long id;
+    private String partNumber;
     private int quantity;
-    private int quantityOnEbay;
     private int quantitySold;
     private String locations;
-    private Date lastSoldDate;
 }
