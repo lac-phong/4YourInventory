@@ -6,7 +6,7 @@
     justify-content: left;
     color: white;
     background-image: linear-gradient(79deg, #131313, #444444 60%, #37AF47);
-    padding-left: 7%;
+    padding-left: 10%;
   }
   
   .auth-form-container, .login-form, .register-form {
@@ -55,6 +55,6 @@
 
   .logoimg img{
     width: 650px;
-    margin-left: 120px;
+    margin-left: 160px;
     border-radius: 20px;
   }
