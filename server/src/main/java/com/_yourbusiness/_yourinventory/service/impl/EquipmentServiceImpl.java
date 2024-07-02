@@ -29,4 +29,18 @@ public class EquipmentServiceImpl implements EquipmentService {
         return EquipmentMapper.mapToEquipmentDto(equipment);
     }
 
+    @Override
+    public EquipmentDto updateEquipment(Long partNumberId, EquipmentDto updatedEquipment) {
+        Equipment equipment = equipmentRepository.findById(partNumberId).orElseThrow(
+                () -> new ResourceNotFoundException("Equipment does not exist with given part number: " + partNumberId)
+        );
+        equipment.setQuantity(updatedEquipment.getQuantity());
+        equipment.setQuantitySold(updatedEquipment.getQuantitySold());
+        equipment.setLocations(updatedEquipment.getLocations());
+
+        Equipment updatedEquipmentObj = equipmentRepository.save(equipment);
+
+        return EquipmentMapper.mapToEquipmentDto(updatedEquipmentObj);
+    }
+
 }

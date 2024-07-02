@@ -19,7 +19,7 @@ function Layout() {
         <Route path="/home" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/addproduct" element={<AddProduct />} />
-        <Route path="/inventory" element={<Inventory />} />
+        <Route path="/inventory/:partNumbers" element={<Inventory />} />
       </Routes>
       <Footer />
     </>
