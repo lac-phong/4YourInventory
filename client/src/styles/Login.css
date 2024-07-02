@@ -1,60 +1,47 @@
-.Logpage {
-    text-align: center;
-    display: flex;
-    min-height: 100vh;
-    align-items: center;
-    justify-content: left;
-    color: white;
-    background-image: linear-gradient(79deg, #131313, #444444 60%, #37AF47);
-    padding-left: 10%;
+@media (min-width: 1025px) {
+  .h-custom-2 {
+    height: 100%;
   }
-  
-  .auth-form-container, .login-form, .register-form {
-    display: flex;
-    flex-direction: column;
-  }
-  
-  @media screen and (min-width: 600px) {
-    .auth-form-container {
-      padding: 5rem;
-      border: 1px solid white;
-      border-radius: 10px;
-      margin: 0.5rem;
-    }
-  }
-  
-  label {
-    text-align: left;
-    padding: 0.25rem 0;
-    font-size: 1.2rem;
-  }
-  
-  input {
-    margin: 0.5rem 0;
-    padding: 1rem;
-    border: none;
-    border-radius: 10px;
-    font-size: 1rem;
-  }
-  
-  button {
-    border: none;
-    background-color: white;
-    padding: 20px;
-    border-radius: 10px;
-    cursor: pointer;
-    color: #1e612d;
-    font-size: 1.2rem;
-  }
-  
-  .link-btn {
-    background: none;
-    color: white;
-    text-decoration: underline;
-  }
+}
 
-  .logoimg img{
-    width: 650px;
-    margin-left: 160px;
-    border-radius: 20px;
-  }
+.white-background {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+
+.logo-img {
+  width: 100px; /* Adjust the width as needed */
+  height: auto;
+}
+
+.green-button {
+  background: #43e97b;
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, #32b55e, #2ecaad);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #32b55e, #2ecaad);
+}
+
+.right-background {
+  background: #43e97b;
+  /* Chrome 10-25, Safari 5.1-6 */
+  background: -webkit-linear-gradient(to right, #32b55e, #2ecaad);
+  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+  background: linear-gradient(to right, #32b55e, #2ecaad);
+  height: 100vh; /* Ensure it covers the full height of the viewport */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.green-text-container {
+  text-align: center;
+  padding: 20px; /* Adjust padding as needed */
+  padding-top: 425px;
+}
+    
+.text-white {
+  color: white; /* Ensures text is white */
+}
