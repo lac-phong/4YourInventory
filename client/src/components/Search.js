@@ -7,6 +7,7 @@ function Search() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
+        console.log('Navigating to:', `/inventory/${input}`); // Debugging line
         navigate(`/inventory/${input}`);
     };
 
@@ -17,7 +18,7 @@ function Search() {
                 <input type="submit" />
             </form>
         </div>  
-    )
+    );
 }
 
 export default Search;

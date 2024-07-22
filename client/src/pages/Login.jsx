@@ -19,7 +19,7 @@ function Login() {
         <MDBCol sm='6' className='white-background'>
 
           <div className='d-flex flex-column align-items-center pt-5'>
-            <img src={LogoImage} alt="logo" style={{width: '450px', height: '150px'}} className="logo-img" />
+            <img src={LogoImage} alt="logo" style={{width: '450px', height: '180px'}} className="logo-img" />
           </div>
 
           <div className='d-flex flex-column justify-content-center h-custom-2 w-75 pt-4'>
