@@ -15,15 +15,20 @@ const pool = mysql.createPool({
 
 // ------------------------------------------------------------- PART NUMBERS -------------------------------------------------------------------------//
 
-export async function getPartNumber() {
+export async function getItemByPartNumber(part_number) {
     const sql = `
-        SELECT ITEM.part_number FROM movedbtwo.parts ITEM;
+        SELECT * FROM movedbtwo.parts
+        WHERE part_number = ?;
     `;
     try {
-        const [rows] = await pool.query(sql);
-        return rows;
+        const [rows] = await pool.query(sql, [part_number]);
+        if (rows.length){
+            return rows[0];
+        } else {
+            throw new Error('Item not found');
+        }
     } catch (error) {
-        throw new Error('Failed to retrieve businesses: ' + error.message);
+        throw new Error('Failed to retrieve item by part number: ' + error.message);
     }
 }
 
@@ -33,6 +38,10 @@ export async function insertPart(id, partNumber, quantity, quantityOnEbay, quant
         VALUES (?, ?, ?, ?, ?, ?);
     `;
     try {
+        const partExists = await checkPartExists(partNumber);
+        if (partExists) {
+            throw new Error('Part already exists');
+        }
         const [result] = await pool.query(sql, [id, partNumber, quantity, quantityOnEbay, quantitySold, locations]);
         if (result.affectedRows) {
             return { inserted: true };
@@ -44,27 +53,20 @@ export async function insertPart(id, partNumber, quantity, quantityOnEbay, quant
     }
 }
 
+
 export async function updatePart(id, updates) {
-    // Ensure that there is at least one field to update
-    const validFields = ['part_number', 'quantity', 'quantity_on_ebay', 'quantity_sold', 'locations'];
-    const fieldsToUpdate = Object.keys(updates).filter(field => validFields.includes(field));
+    const { part_number, quantity, quantity_on_ebay, quantity_sold, locations } = updates;
 
-    if (fieldsToUpdate.length === 0) {
-        throw new Error('No valid fields to update');
-    }
-
-    // Build the SQL query dynamically
-    const setClause = fieldsToUpdate.map(field => `${field.toUpperCase()} = ?`).join(', ');
-    const sql = `UPDATE movedbtwo.parts SET ${setClause} WHERE ID = ?`;
-
-    // Prepare the values array
-    const values = fieldsToUpdate.map(field => updates[field]);
-    values.push(id);
+    const sql = `
+        UPDATE movedbtwo.parts
+        SET part_number = ?, quantity = ?, quantity_on_ebay = ?, quantity_sold = ?, locations = ?
+        WHERE ID = ?;
+    `;
 
     try {
-        const [result] = await pool.query(sql, values);
+        const [result] = await pool.query(sql, [part_number, quantity, quantity_on_ebay, quantity_sold, locations, id]);
         if (result.affectedRows) {
-            return { id, ...updates };
+            return { id, part_number, quantity, quantity_on_ebay, quantity_sold, locations };
         } else {
             throw new Error('Part not found or no update needed');
         }
@@ -72,6 +74,7 @@ export async function updatePart(id, updates) {
         throw new Error('Database operation failed: ' + error.message);
     }
 }
+
 
 export async function deletePart(partNumber) {
     const sql = `
