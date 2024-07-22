@@ -1,41 +1,59 @@
 .inventory {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    padding: 1rem;
-  }
-  
-  .table {
-    border-collapse: collapse;
-    width: 100%;
-  }
-  
-  th,
-  td {
-    border: 1px solid #ffffff;
-    text-align: left;
-    padding: 8px;
-    font-size: 20px;
-  }
-  
-  th {
-    background-color: #20B934;
-  }
-  
-  td {
-    background-color: #D3FAD9;
-  }
-  
-  form {
-    display: flex;
-    gap: 5px;
-  }
-  
-  form td:last-child {
-    display: flex;
-    justify-content: space-evenly;
-  }
-  
-  form * {
-    font-size: 28px;
-  }
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  padding: 1rem;
+  align-items: center;
+}
+
+.table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+th,
+td {
+  border: 1px solid #ffffff;
+  text-align: left;
+  padding: 16px; /* Consistent padding */
+  font-size: 16px; /* Smaller font size for table cells */
+}
+
+th {
+  background-color: #20B934;
+}
+
+td {
+  background-color: #D3FAD9;
+}
+
+form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 100%; /* Ensure form takes full width */
+}
+
+form .form-group {
+  display: flex;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+form label {
+  flex: 1; /* Label takes up equal space */
+  font-size: 16px; /* Smaller font size for labels */
+}
+
+form input {
+  flex: 2; /* Input takes up twice the space of the label */
+  font-size: 16px; /* Smaller font size for input fields */
+  padding: 8px; /* Match padding of table cells */
+  border: 1px solid #ccc; /* Match border style */
+}
+
+form .btn {
+  width: 100px; /* Ensure buttons are the same width */
+  height: 40px; /* Ensure buttons are the same height */
+  font-size: 16px; /* Smaller font size for buttons */
+}

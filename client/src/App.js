@@ -10,19 +10,18 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from "react-route
 
 function Layout() {
   const location = useLocation();
-  
+
   return (
-    <>
+    <div className="router-wrapper">
       {location.pathname !== "/" && <Navbar />}
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/home" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/addproduct" element={<AddProduct />} />
-        <Route path="/inventory/:partNumbers" element={<Inventory />} />
+        <Route path="/inventory/:partNumber" element={<Inventory />} />
       </Routes>
-      <Footer />
-    </>
+    </div>
   );
 }
 
@@ -31,6 +30,7 @@ function App() {
     <div className="App">
       <Router>
         <Layout />
+        <Footer />
       </Router>
     </div>
   );
