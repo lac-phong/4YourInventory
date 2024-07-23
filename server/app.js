@@ -6,7 +6,7 @@ import {
     getItemByPartNumber,
     insertPart,
     updatePart,
-    deletePart
+    deleteSerialNumbers
 } from './database.js';
 
 dotenv.config();
@@ -32,8 +32,8 @@ app.get("/parts/:part_number", async (req, res) => {
 
 // EXTERNAL: insert a new part
 app.post("/parts", async (req, res) => {
-    const { id, partNumber, quantity, quantityOnEbay, quantitySold, locations } = req.body;
-    const newPart = await insertPart(id, partNumber, quantity, quantityOnEbay, quantitySold, locations);
+    const { partNumber, locations, serialNumbers } = req.body;
+    const newPart = await insertPart(partNumber, locations, serialNumbers);
     res.json(newPart);
 });
 
@@ -46,12 +46,13 @@ app.put("/parts/:id", async (req, res) => {
     res.json(updatedPart);
 });
 
-// EXTERNAL: delete a part
-app.delete("/parts/:partNumber", async (req, res) => {
-    const { partNumber } = req.params;
-    const deletedPart = await deletePart(partNumber);
-    res.json(deletedPart);
-});
+// External: delete serial numbers
+app.delete('/api/serialNumbers', async (req, res) => {
+    const { partNumber, serialNumbers } = req.body;
+    const deletedSerials = await deleteSerialNumbers(partNumber, serialNumbers);
+    res.json(deletedSerials);
+  });
+
 
 // Start the server
 const port = process.env.PORT || 8080;
