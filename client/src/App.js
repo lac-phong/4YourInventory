@@ -6,6 +6,7 @@ import Dashboard from "./pages/Dash";
 import AddProduct from "./pages/AddProduct";
 import Inventory from "./pages/Inventory";
 import Login from "./pages/Login";
+import Selling from "./pages/Selling";
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
 
 function Layout() {
@@ -19,6 +20,7 @@ function Layout() {
         <Route path="/home" element={<Home />} />
         <Route path="/dashboard" element={<Dashboard />} />
         <Route path="/addproduct" element={<AddProduct />} />
+        <Route path="/selling" element={<Selling />} />
         <Route path="/inventory/:partNumber" element={<Inventory />} />
       </Routes>
     </div>

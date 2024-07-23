@@ -1,13 +1,10 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Form, Button, Table, Alert } from 'react-bootstrap';
+import { Form, Button, Table, Container } from 'react-bootstrap';
 import axios from 'axios';
 
-function AddProduct() {
+function Selling() {
   const [partNumber, setPartNumber] = useState('');
-  const [location, setLocation] = useState('');
   const [serialNumbers, setSerialNumbers] = useState(['']);
-  const [error, setError] = useState(null);
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef([React.createRef()]);
 
   useEffect(() => {
@@ -25,48 +22,40 @@ function AddProduct() {
     setSerialNumbers(list);
   };
 
+  const handleRemoveSerialNumber = (index) => {
+    const list = [...serialNumbers];
+    list.splice(index, 1);
+    inputRefs.current.splice(index, 1);
+    setSerialNumbers(list);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setError(null);
 
-    if (!partNumber || !location || serialNumbers.filter(serial => serial !== '').length === 0) {
-      setError('Please fill in all fields and add at least one serial number.');
-      return;
-    }
     const payload = {
       partNumber,
-      location,
-      serialNumbers: serialNumbers.filter(serial => serial !== '')
+      serialNumbers: serialNumbers.filter(serial => serial !== '') // Filter out empty serial numbers
     };
 
-    console.log(payload)
-
-    console.log('Submitting payload:', payload);  // Log payload
-
     try {
-      setIsSubmitting(true);
-      const response = await axios.post('http://localhost:8080/parts', payload); // Ensure URL is correct
-      setIsSubmitting(false);
-      if (response.data.inserted) {
-        alert('Product added successfully');
+      const response = await axios.delete('http://localhost:8080/serialNumbers', { data: payload });
+      if (response.data.deleted) {
+        alert('Serial numbers deleted successfully');
         setPartNumber('');
-        setLocation('');
         setSerialNumbers(['']);
         inputRefs.current = [React.createRef()];
       } else {
-        setError('Failed to add product');
+        alert('Failed to delete serial numbers');
       }
     } catch (error) {
-      console.error('There was an error adding the product:', error);
-      setError('Failed to add product');
-      setIsSubmitting(false);
+      console.error('Error deleting serial numbers:', error);
+      alert('Failed to delete serial numbers');
     }
   };
 
   return (
-    <div className="container mt-5">
-      <h2>Add Product</h2>
-      {error && <Alert variant="danger">{error}</Alert>}
+    <Container className="mt-5">
+      <h2>Selling Page</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="partNumber">
           <Form.Label>Part Number</Form.Label>
@@ -75,16 +64,7 @@ function AddProduct() {
             placeholder="Enter part number"
             value={partNumber}
             onChange={(e) => setPartNumber(e.target.value)}
-          />
-        </Form.Group>
-
-        <Form.Group controlId="location" className="mt-3">
-          <Form.Label>Location</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter location"
-            value={location}
-            onChange={(e) => setLocation(e.target.value)}
+            required
           />
         </Form.Group>
 
@@ -93,6 +73,7 @@ function AddProduct() {
           <thead>
             <tr>
               <th>Serial Number</th>
+              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -107,18 +88,29 @@ function AddProduct() {
                     placeholder={`Scan serial number ${index + 1}`}
                   />
                 </td>
+                <td>
+                  {serialNumbers.length > 1 && (
+                    <Button 
+                      variant="danger" 
+                      onClick={() => handleRemoveSerialNumber(index)}
+                      disabled={serialNumbers.length <= 1}
+                    >
+                      Remove
+                    </Button>
+                  )}
+                </td>
               </tr>
             ))}
           </tbody>
         </Table>
 
-        <Button variant="success" type="submit" className="mt-3" disabled={isSubmitting}>
-          {isSubmitting ? 'Submitting...' : 'Submit'}
+        <Button variant="success" type="submit" className="mt-3">
+          Sold
         </Button>
       </Form>
       <br></br>
-    </div>
+    </Container>
   );
 }
 
-export default AddProduct;
+export default Selling;
