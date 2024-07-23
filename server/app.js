@@ -32,8 +32,8 @@ app.get("/parts/:part_number", async (req, res) => {
 
 // EXTERNAL: insert a new part
 app.post("/parts", async (req, res) => {
-    const { partNumber, locations, serialNumbers } = req.body;
-    const newPart = await insertPart(partNumber, locations, serialNumbers);
+    const { partNumber, location, serialNumbers } = req.body;
+    const newPart = await insertPart(partNumber, location, serialNumbers);
     res.json(newPart);
 });
 
