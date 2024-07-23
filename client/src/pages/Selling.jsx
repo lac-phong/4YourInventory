@@ -8,7 +8,9 @@ function Selling() {
   const inputRefs = useRef([React.createRef()]);
 
   useEffect(() => {
-    inputRefs.current[inputRefs.current.length - 1].current.focus();
+    if (inputRefs.current.length > 0) {
+      inputRefs.current[inputRefs.current.length - 1].current.focus();
+    }
   }, [serialNumbers]);
 
   const handleAddSerialNumber = (e, index) => {
@@ -45,18 +47,18 @@ function Selling() {
     };
 
     try {
-      const response = await axios.delete('http://localhost:8080/serialNumbers', { data: payload });
-      if (response.data.deleted) {
-        alert('Serial numbers deleted successfully');
+      const response = await axios.put('http://localhost:8080/serials', payload);
+      if (response.data.updated) {
+        alert('Serial numbers marked as sold successfully');
         setPartNumber('');
         setSerialNumbers(['']);
         inputRefs.current = [React.createRef()];
       } else {
-        alert('Failed to delete serial numbers');
+        alert('Failed to mark serial numbers as sold');
       }
     } catch (error) {
-      console.error('Error deleting serial numbers:', error);
-      alert('Failed to delete serial numbers');
+      console.error('Error marking serial numbers as sold:', error);
+      alert('Error marking serial numbers as sold');
     }
   };
 

@@ -6,7 +6,7 @@ import {
     getItemByPartNumber,
     insertPart,
     updatePart,
-    deleteSerialNumbers
+    markSerialNumbersAsSold
 } from './database.js';
 
 dotenv.config();
@@ -32,8 +32,8 @@ app.get("/parts/:part_number", async (req, res) => {
 
 // EXTERNAL: insert a new part
 app.post("/parts", async (req, res) => {
-    const { partNumber, locations, serialNumbers } = req.body;
-    const newPart = await insertPart(partNumber, locations, serialNumbers);
+    const { partNumber, location, serialNumbers } = req.body;
+    const newPart = await insertPart(partNumber, location, serialNumbers);
     res.json(newPart);
 });
 
@@ -46,13 +46,15 @@ app.put("/parts/:id", async (req, res) => {
     res.json(updatedPart);
 });
 
-// External: delete serial numbers
-app.delete('/api/serialNumbers', async (req, res) => {
+// EXTERNAL: mark serial numbers as sold
+app.put("/serials", async (req, res) => {
     const { partNumber, serialNumbers } = req.body;
-    const deletedSerials = await deleteSerialNumbers(partNumber, serialNumbers);
-    res.json(deletedSerials);
-  });
-
+    if (!partNumber || !serialNumbers || !serialNumbers.length) {
+        return res.status(400).json({ error: 'Part number and serial numbers are required' });
+    }
+    const result = await markSerialNumbersAsSold(partNumber, serialNumbers);
+    res.json(result);
+});
 
 // Start the server
 const port = process.env.PORT || 8080;
