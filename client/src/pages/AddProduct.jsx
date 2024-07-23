@@ -25,6 +25,20 @@ function AddProduct() {
     setSerialNumbers(list);
   };
 
+  const handleRemoveSerialNumber = (index) => {
+    const list = [...serialNumbers];
+    list.splice(index, 1);
+    inputRefs.current.splice(index, 1);
+    setSerialNumbers(list);
+  };
+
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !e.target.value && index === serialNumbers.length - 1) {
+      e.preventDefault();
+      handleRemoveSerialNumber(index);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError(null);
@@ -39,9 +53,7 @@ function AddProduct() {
       serialNumbers: serialNumbers.filter(serial => serial !== '')
     };
 
-    console.log(payload)
-
-    console.log('Submitting payload:', payload);  // Log payload
+    console.log(payload);
 
     try {
       setIsSubmitting(true);
@@ -104,6 +116,7 @@ function AddProduct() {
                     type="text"
                     value={serial}
                     onChange={(e) => handleAddSerialNumber(e, index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
                     placeholder={`Scan serial number ${index + 1}`}
                   />
                 </td>
