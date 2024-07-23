@@ -29,6 +29,13 @@ function Selling() {
     setSerialNumbers(list);
   };
 
+  const handleKeyDown = (e, index) => {
+    if (e.key === 'Backspace' && !e.target.value && index === serialNumbers.length - 1) {
+      e.preventDefault();
+      handleRemoveSerialNumber(index);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
@@ -73,7 +80,6 @@ function Selling() {
           <thead>
             <tr>
               <th>Serial Number</th>
-              <th>Actions</th>
             </tr>
           </thead>
           <tbody>
@@ -85,19 +91,9 @@ function Selling() {
                     type="text"
                     value={serial}
                     onChange={(e) => handleAddSerialNumber(e, index)}
+                    onKeyDown={(e) => handleKeyDown(e, index)}
                     placeholder={`Scan serial number ${index + 1}`}
                   />
-                </td>
-                <td>
-                  {serialNumbers.length > 1 && (
-                    <Button 
-                      variant="danger" 
-                      onClick={() => handleRemoveSerialNumber(index)}
-                      disabled={serialNumbers.length <= 1}
-                    >
-                      Remove
-                    </Button>
-                  )}
                 </td>
               </tr>
             ))}
