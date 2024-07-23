@@ -8,9 +8,10 @@ CREATE TABLE parts (
 );
 
 CREATE TABLE serials (
-	id INT AUTO_INCREMENT PRIMARY KEY,
-	serial_number VARCHAR(255) UNIQUE,
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    serial_number VARCHAR(255),
     part_number VARCHAR(255),
     sold BIT,
-    FOREIGN KEY (part_number) REFERENCES parts(part_number)
+    FOREIGN KEY (part_number) REFERENCES parts(part_number),
+    UNIQUE (serial_number, part_number)
 );
