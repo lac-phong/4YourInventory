@@ -18,6 +18,7 @@ function Navbar() {
           <Link to="/home"> Home </Link>
           <Link to="/dashboard"> Dashboard </Link>
           <Link to="/addproduct"> Add Product </Link>
+          <Link to="/selling"> Selling </Link>
           <Link to="/" className="logout-link"> Logout </Link>
         </div>
       </div>
@@ -25,6 +26,7 @@ function Navbar() {
         <Link to="/home"> Home </Link>
         <Link to="/dashboard"> Dashboard </Link>
         <Link to="/addproduct"> Add Product </Link>
+        <Link to="/selling"> Selling </Link>
         <Link to="/" className="logout-link"> Logout </Link>
         <button onClick={toggleNavbar}>
           <ReorderIcon />
