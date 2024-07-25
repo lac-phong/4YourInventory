@@ -11,6 +11,8 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from "react-route
 import { AuthProvider } from './contexts/AuthContext';
 import Signup from './pages/Signup';
 import PrivateRoute from './components/PrivateRoutes';
+import ForgotPassword from './pages/forgotpassword';
+
 
 function Layout() {
   const location = useLocation();
@@ -18,10 +20,11 @@ function Layout() {
   return (
     <AuthProvider>
     <div className="router-wrapper">
-      {location.pathname !== "/" && location.pathname !== "/signup" && <Navbar />}
+      {location.pathname !== "/" && location.pathname !== "/signup" && location.pathname !== "/forgotpassword" && <Navbar />}
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} /> 
+        <Route path="/signup" element={<Signup />} />
+        <Route path="/forgotpassword" element={<ForgotPassword />} /> 
         <Route path="/" element={<PrivateRoute />}>
           <Route path="/home" element={<Home />} />
           <Route path="/dashboard" element={<Dashboard />} />

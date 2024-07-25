@@ -1,42 +1,5 @@
-.right-background {
-  background: #43e97b;
-  /* Chrome 10-25, Safari 5.1-6 */
-  background: -webkit-linear-gradient(to right, #32b55e, #2ecaad);
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  background: linear-gradient(to right, #32b55e, #2ecaad);
-  min-height: 100vh; /* Ensure it covers the full height of the viewport */
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%; /* Ensure it covers the full width of the viewport */
-}
-
-.white-background {
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-}
-
-.logo-img {
-  width: 100px; /* Adjust the width as needed */
-  height: auto;
-}
-
-.green-button {
-  background: #43e97b;
-  /* Chrome 10-25, Safari 5.1-6 */
-  background: -webkit-linear-gradient(to right, #32b55e, #2ecaad);
-  /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
-  background: linear-gradient(to right, #32b55e, #2ecaad);
-}
-
-.green-text-container {
-  text-align: center;
-  padding: 20px; /* Adjust padding as needed */
-  padding-top: 50%;
-}
-
-.text-white {
-  color: white; /* Ensures text is white */
+@media (min-width: 1025px) {
+  .h-custom-2 {
+    height: 100%;
+  }
 }
