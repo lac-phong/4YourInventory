@@ -35,49 +35,37 @@ export async function getItemByPartNumber(part_number) {
     }
 }
 
-
-export async function insertPart(partNumber, locations, serialNumbers) {
+export async function insertPart(partNumber, locations, serialNumbers, item_description, category, manufacturer, item_condition) {
     const sqlInsertPart = `
-        INSERT INTO parts (ID, part_number, quantity, quantity_on_ebay, quantity_sold, locations)
-        VALUES (?, ?, ?, ?, ?, ?);
+        INSERT INTO parts (part_number, quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer)
+        VALUES (?, ?, ?, ?, ?, ?, ?);
     `;
     const sqlInsertSerial = `
-        INSERT INTO serials (part_number, serial_number)
-        VALUES (?, ?);
+        INSERT INTO serials (part_number, serial_number, locations, item_condition)
+        VALUES (?, ?, ?, ?);
     `;
-    const sqlSelectPart = 'SELECT ID FROM parts WHERE part_number = ?';
+    const sqlSelectPart = 'SELECT part_number FROM parts WHERE part_number = ?';
     let connection;
     try {
         connection = await pool.getConnection(); // Use the connection pool
 
         // Check if the part_number already exists
         const [existingPart] = await connection.query(sqlSelectPart, [partNumber]);
+            
+        const quantity = 0;
+        const quantitySold = 0;
+        const quantityOnEbay = 0;
         
-        let partId;
-        if (existingPart.length > 0) {
-            // If the part already exists, use the existing ID
-            partId = existingPart[0].ID;
-        } else {
-            // Get the new ID
-            const [rows] = await connection.query('SELECT MAX(ID) as maxId FROM parts');
-            const newId = rows[0].maxId + 1;
-            partId = newId;
-            
-            const quantity = 0;
-            const quantitySold = 0;
-            const quantityOnEbay = 0;
-            
-            // Insert the new part
-            const [result] = await connection.query(sqlInsertPart, [newId, partNumber, quantity, quantityOnEbay, quantitySold, locations]);
-            if (!result.affectedRows) {
-                console.error('Insert failed, no rows affected');
-                throw new Error('Insert failed, no rows affected');
-            }
+        // Insert the new part
+        const [result] = await connection.query(sqlInsertPart, [partNumber, quantity, quantityOnEbay, quantitySold, item_description, category, manufacturer]);
+        if (!result.affectedRows) {
+            console.error('Insert failed, no rows affected');
+            throw new Error('Insert failed, no rows affected');
         }
 
         // Insert serial numbers
         for (const serialNumber of serialNumbers) {
-            await connection.query(sqlInsertSerial, [partNumber, serialNumber]);
+            await connection.query(sqlInsertSerial, [partNumber, serialNumber, locations, item_condition]);
         }
 
         return { inserted: true };
@@ -89,20 +77,22 @@ export async function insertPart(partNumber, locations, serialNumbers) {
     }
 }
 
-
-export async function updatePart(id, updates) {
-    const { part_number, quantity, quantity_on_ebay, quantity_sold, locations } = updates;
+export async function updatePart(part_number, updates) {
+    const { quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer } = updates;
 
     const sql = `
         UPDATE movedbtwo.parts
-        SET part_number = ?, quantity = ?, quantity_on_ebay = ?, quantity_sold = ?, locations = ?
-        WHERE ID = ?;
+        SET quantity = ?, quantity_on_ebay = ?, quantity_sold = ?, item_description = ?, category = ?, manufacturer = ?
+        WHERE part_number = ?;
     `;
 
     try {
-        const [result] = await pool.query(sql, [part_number, quantity, quantity_on_ebay, quantity_sold, locations, id]);
+        console.log('Update SQL:', sql);
+        console.log('Parameters:', [quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer, part_number]);
+
+        const [result] = await pool.query(sql, [quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer, part_number]);
         if (result.affectedRows) {
-            return { id, part_number, quantity, quantity_on_ebay, quantity_sold, locations };
+            return { part_number, quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer };
         } else {
             throw new Error('Part not found or no update needed');
         }
@@ -110,7 +100,6 @@ export async function updatePart(id, updates) {
         throw new Error('Database operation failed: ' + error.message);
     }
 }
-
 
 // Function to sell serial numbers
 export async function markSerialNumbersAsSold(partNumber, serialNumbers) {
@@ -169,7 +158,7 @@ export async function markSerialNumbersAsSold(partNumber, serialNumbers) {
 async function checkPartExists(partNumber) {
     const sql = `
         SELECT 1 FROM movedbtwo.parts 
-        WHERE PART_NUMBER = ?
+        WHERE part_number = ?
     `;
     try {
         const [rows] = await pool.query(sql, [partNumber]);

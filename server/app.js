@@ -25,25 +25,33 @@ app.use(cors({
 
 // EXTERNAL: get part numbers
 app.get("/parts/:part_number", async (req, res) => {
-    const {part_number} = req.params;
+    const { part_number } = req.params;
     const parts = await getItemByPartNumber(part_number);
     res.json(parts);
 });
 
 // EXTERNAL: insert a new part
 app.post("/parts", async (req, res) => {
-    const { partNumber, location, serialNumbers } = req.body;
-    const newPart = await insertPart(partNumber, location, serialNumbers);
+    const { partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition } = req.body;
+    const newPart = await insertPart(partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition);
     res.json(newPart);
 });
 
-
 // EXTERNAL: update a part
-app.put("/parts/:id", async (req, res) => {
-    const { id } = req.params;
+app.put("/parts/:part_number", async (req, res) => {
+    const { part_number } = req.params; // Correct extraction of part_number from req.params
     const updates = req.body;
-    const updatedPart = await updatePart(id, updates);
-    res.json(updatedPart);
+
+    console.log('Part Number:', part_number);
+    console.log('Updates:', updates);
+
+    try {
+        const updatedPart = await updatePart(part_number, updates);
+        res.json(updatedPart);
+    } catch (error) {
+        console.error('Failed to update part:', error);
+        res.status(500).json({ error: error.message });
+    }
 });
 
 // EXTERNAL: mark serial numbers as sold
