@@ -1,38 +1,34 @@
-
 import React, { useRef, useState } from "react";
 import { Form, Button, Card, Container, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom"
-import {
-  MDBBtn,
-  MDBContainer,
-  MDBRow,
-  MDBCol,
-  MDBInput
-}
-from 'mdb-react-ui-kit';
-import '../styles/Login.css';
 
-export default function Login() {
+
+
+
+export default function Signup() {
   const emailRef = useRef()
   const passwordRef = useRef()
-  const { login } = useAuth()
+  const passwordConfirmRef = useRef()
+  const { signup } = useAuth()
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const navigate = useNavigate()
 
 
  async function handleSubmit(e) {
     e.preventDefault()
 
 
+    if (passwordRef.current.value !== passwordConfirmRef.current.value){
+      return setError('Passwords do not match')
+    }
+
+
     try{
       setError('')
       setLoading(true)
-      await login(emailRef.current.value, passwordRef.current.value)
-      navigate("/home")
+      await signup(emailRef.current.value, passwordRef.current.value)
     } catch{
-      setError('Failed to sign in')
+      setError('Failed to create an account')
     }
 
 
@@ -41,12 +37,11 @@ export default function Login() {
 
 
   return (
-    <div className="right-background">
     <Container className="d-flex align-items-center justify-content-center" style={{ minHeight: "100vh" }}>
       <div className="w-100" style={{ maxWidth: "400px" }}>
         <Card>
           <Card.Body>
-            <h2 className="text-center mb-4">4YourBusinness Inc.</h2>
+            <h2 className="text-center mb-4">Sign Up</h2>
             {error && <Alert variant="danger">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Form.Group id="email" className="mb-3">
@@ -57,20 +52,18 @@ export default function Login() {
                 <Form.Label>Password</Form.Label>
                 <Form.Control type="password" ref={passwordRef} required />
               </Form.Group>
-              <div className="green-button">
-              <Button disabled={loading} className="w-100" type="submit">Login</Button>
-              </div>
+              <Form.Group id="password-confirm" className="mb-3">
+                <Form.Label>Password Confirmation</Form.Label>
+                <Form.Control type="password" ref={passwordConfirmRef} required />
+              </Form.Group>
+              <Button disabled={loading} className="w-100" type="submit">Sign Up</Button>
             </Form>
           </Card.Body>
         </Card>
         <div className="w-100 text-center mt-2">
-          Don't have an account? <a href="/signup">Click Here</a>
+          Already have an account? <a href="/">Click Here</a>
         </div>
       </div>
     </Container>
-    </div>
   );
 }
-
-
-
