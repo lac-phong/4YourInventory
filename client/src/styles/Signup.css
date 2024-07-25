@@ -1,0 +1,32 @@
+.signup-container {
+    height: 100vh;
+  }
+  
+  .signup-row {
+    height: 100%;
+  }
+  
+  .signup-image-col {
+    height: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  .signup-image {
+    object-fit: cover;
+    object-position: center;
+    height: 100%;
+    width: 100%;
+  }
+  
+  .cascading-right {
+    margin-right: 0;
+  }
+  
+  @media (max-width: 900px) {
+    .cascading-right {
+      margin-right: 0;
+    }
+  }
+  
