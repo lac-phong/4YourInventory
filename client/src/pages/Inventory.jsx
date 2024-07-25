@@ -12,9 +12,11 @@ function Inventory() {
     const [formData, setFormData] = useState({
         part_number: '',
         quantity: '',
-        quantity_on_ebay: '', // Ensure this field is included
+        quantity_on_ebay: '',
         quantity_sold: '',
-        locations: '',
+        item_description: '', // Ensure this field is included
+        category: '', // Ensure this field is included
+        manufacturer: '', // Ensure this field is included
     });
 
     useEffect(() => {
@@ -30,9 +32,11 @@ function Inventory() {
             setFormData({
                 part_number: response.data.part_number,
                 quantity: response.data.quantity,
-                quantity_on_ebay: response.data.quantity_on_ebay, // Ensure this field is set
+                quantity_on_ebay: response.data.quantity_on_ebay,
                 quantity_sold: response.data.quantity_sold,
-                locations: response.data.locations,
+                item_description: response.data.item_description, // Ensure this field is set
+                category: response.data.category, // Ensure this field is set
+                manufacturer: response.data.manufacturer, // Ensure this field is set
             });
         } catch (error) {
             console.error('Error fetching part data:', error);
@@ -47,7 +51,7 @@ function Inventory() {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`http://localhost:8080/parts/${part.id}`, formData);
+            const response = await axios.put(`http://localhost:8080/parts/${formData.part_number}`, formData);
             setPart(response.data);
             setEditMode(false);
         } catch (error) {
@@ -64,18 +68,18 @@ function Inventory() {
                         <table className='table table-striped'>
                             <thead className='thead-dark'>
                                 <tr>
-                                    <th>ID</th>
                                     <th>Part Number</th>
                                     <th>Quantity</th>
                                     <th>Quantity Sold</th>
-                                    <th>Quantity on eBay</th> {/* Added new column */}
-                                    <th>Locations</th>
+                                    <th>Quantity on eBay</th>
+                                    <th>Item Description</th>
+                                    <th>Category</th>
+                                    <th>Manufacturer</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr key={part.id}>
-                                    <td>{part.id}</td>
+                                <tr key={part.part_number}>
                                     <td>
                                         {editMode ? (
                                             <input
@@ -132,13 +136,39 @@ function Inventory() {
                                         {editMode ? (
                                             <input
                                                 type='text'
-                                                name='locations'
+                                                name='item_description'
                                                 className='form-control'
-                                                value={formData.locations}
+                                                value={formData.item_description}
                                                 onChange={handleInputChange}
                                             />
                                         ) : (
-                                            part.locations
+                                            part.item_description
+                                        )}
+                                    </td>
+                                    <td>
+                                        {editMode ? (
+                                            <input
+                                                type='text'
+                                                name='category'
+                                                className='form-control'
+                                                value={formData.category}
+                                                onChange={handleInputChange}
+                                            />
+                                        ) : (
+                                            part.category
+                                        )}
+                                    </td>
+                                    <td>
+                                        {editMode ? (
+                                            <input
+                                                type='text'
+                                                name='manufacturer'
+                                                className='form-control'
+                                                value={formData.manufacturer}
+                                                onChange={handleInputChange}
+                                            />
+                                        ) : (
+                                            part.manufacturer
                                         )}
                                     </td>
                                     <td>

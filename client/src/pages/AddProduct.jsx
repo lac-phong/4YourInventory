@@ -6,6 +6,10 @@ function AddProduct() {
   const [partNumber, setPartNumber] = useState('');
   const [location, setLocation] = useState('');
   const [serialNumbers, setSerialNumbers] = useState(['']);
+  const [itemDescription, setItemDescription] = useState('');
+  const [category, setCategory] = useState('');
+  const [manufacturer, setManufacturer] = useState('');
+  const [itemCondition, setItemCondition] = useState('');
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const inputRefs = useRef([React.createRef()]);
@@ -50,7 +54,11 @@ function AddProduct() {
     const payload = {
       partNumber,
       location,
-      serialNumbers: serialNumbers.filter(serial => serial !== '')
+      serialNumbers: serialNumbers.filter(serial => serial !== ''),
+      item_description: itemDescription, // Ensure this field is included
+      category, // Ensure this field is included
+      manufacturer, // Ensure this field is included
+      item_condition: itemCondition, // Ensure this field is included
     };
 
     console.log(payload);
@@ -64,6 +72,10 @@ function AddProduct() {
         setPartNumber('');
         setLocation('');
         setSerialNumbers(['']);
+        setItemDescription('');
+        setCategory('');
+        setManufacturer('');
+        setItemCondition('');
         inputRefs.current = [React.createRef()];
       } else {
         setError('Failed to add product');
@@ -97,6 +109,46 @@ function AddProduct() {
             placeholder="Enter location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group controlId="itemDescription" className="mt-3">
+          <Form.Label>Item Description</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter item description"
+            value={itemDescription}
+            onChange={(e) => setItemDescription(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group controlId="category" className="mt-3">
+          <Form.Label>Category</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter category"
+            value={category}
+            onChange={(e) => setCategory(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group controlId="manufacturer" className="mt-3">
+          <Form.Label>Manufacturer</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter manufacturer"
+            value={manufacturer}
+            onChange={(e) => setManufacturer(e.target.value)}
+          />
+        </Form.Group>
+
+        <Form.Group controlId="itemCondition" className="mt-3">
+          <Form.Label>Item Condition</Form.Label>
+          <Form.Control
+            type="text"
+            placeholder="Enter item condition"
+            value={itemCondition}
+            onChange={(e) => setItemCondition(e.target.value)}
           />
         </Form.Group>
 
