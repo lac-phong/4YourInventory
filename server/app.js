@@ -25,18 +25,24 @@ app.use(cors({
 
 // ------------------------------------------------------------- PARTS ---------------------------------------------------------------------------//
 
-// EXTERNAL: get part numbers
 app.get("/parts/:part_number", async (req, res) => {
     const { part_number } = req.params;
-    const parts = await getItemByPartNumber(part_number);
-    res.json(parts);
+    try {
+        const parts = await getItemByPartNumber(part_number);
+        res.json(parts);
+    } catch (error) {
+        res.status(404).json({ error: error.message });
+    }
 });
 
-// EXTERNAL: get serial numbers
 app.get("/serials/:serial_number", async (req, res) => {
     const { serial_number } = req.params;
-    const serials = await getItemBySerialNumber(serial_number);
-    res.json(serials);
+    try {
+        const serials = await getItemBySerialNumber(serial_number);
+        res.json(serials);
+    } catch (error) {
+        res.status(404).json({ error: error.message });
+    }
 });
 
 // EXTERNAL: insert a new part
