@@ -32,11 +32,13 @@ function Selling() {
   };
 
   const handleKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !e.target.value && index === serialNumbers.length - 1) {
-      e.preventDefault();
-      handleRemoveSerialNumber(index);
+    if (e.key === 'Backspace' && !e.target.value) {
+        e.preventDefault();
+        if (serialNumbers.length > 1) { // Ensure that there's more than one serial number input
+            handleRemoveSerialNumber(index);
+        }
     }
-  };
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();

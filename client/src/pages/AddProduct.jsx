@@ -37,9 +37,11 @@ function AddProduct() {
   };
 
   const handleKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !e.target.value && index === serialNumbers.length - 1) {
+    if (e.key === 'Backspace' && !e.target.value) {
       e.preventDefault();
-      handleRemoveSerialNumber(index);
+      if (serialNumbers.length > 1) { // Ensure that there's more than one serial number input
+        handleRemoveSerialNumber(index);
+      }
     }
   };
 
@@ -55,17 +57,17 @@ function AddProduct() {
       partNumber,
       location,
       serialNumbers: serialNumbers.filter(serial => serial !== ''),
-      item_description: itemDescription, // Ensure this field is included
-      category, // Ensure this field is included
-      manufacturer, // Ensure this field is included
-      item_condition: itemCondition, // Ensure this field is included
+      item_description: itemDescription,
+      category,
+      manufacturer,
+      item_condition: itemCondition,
     };
 
     console.log(payload);
 
     try {
       setIsSubmitting(true);
-      const response = await axios.post('http://localhost:8080/parts', payload); // Ensure URL is correct
+      const response = await axios.post('http://localhost:8080/parts', payload);
       setIsSubmitting(false);
       if (response.data.inserted) {
         alert('Product added successfully');
@@ -181,7 +183,7 @@ function AddProduct() {
           {isSubmitting ? 'Submitting...' : 'Submit'}
         </Button>
       </Form>
-      <br></br>
+      <br />
     </div>
   );
 }
