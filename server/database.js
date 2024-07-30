@@ -25,7 +25,7 @@ export async function getItemByPartNumber(part_number) {
     `;
     try {
         const [rows] = await pool.query(sql, [part_number]);
-        if (rows.length){
+        if (rows.length) {
             return rows[0];
         } else {
             throw new Error('Item not found');
@@ -34,6 +34,7 @@ export async function getItemByPartNumber(part_number) {
         throw new Error('Failed to retrieve item by part number: ' + error.message);
     }
 }
+
 export async function getItemBySerialNumber(serial_number) {
     const sql = `
         SELECT * FROM movedbtwo.serials
