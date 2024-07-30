@@ -4,8 +4,10 @@ import dotenv from 'dotenv';
 
 import {
     getItemByPartNumber,
+    getItemBySerialNumber,
     insertPart,
     updatePart,
+    updateSerial,
     markSerialNumbersAsSold
 } from './database.js';
 
@@ -30,6 +32,13 @@ app.get("/parts/:part_number", async (req, res) => {
     res.json(parts);
 });
 
+// EXTERNAL: get serial numbers
+app.get("/serials/:serial_number", async (req, res) => {
+    const { serial_number } = req.params;
+    const serials = await getItemBySerialNumber(serial_number);
+    res.json(serials);
+});
+
 // EXTERNAL: insert a new part
 app.post("/parts", async (req, res) => {
     const { partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition } = req.body;
@@ -50,6 +59,23 @@ app.put("/parts/:part_number", async (req, res) => {
         res.json(updatedPart);
     } catch (error) {
         console.error('Failed to update part:', error);
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// EXTERNAL: update a serial
+app.put("/serials/:serial_number", async (req, res) => {
+    const { serial_number } = req.params; // Correct extraction of serial_number from req.params
+    const updates = req.body;
+
+    console.log('Serial Number:', serial_number);
+    console.log('Updates:', updates);
+
+    try {
+        const updatedSerial = await updateSerial(serial_number, updates);
+        res.json(updatedSerial);
+    } catch (error) {
+        console.error('Failed to update serial:', error);
         res.status(500).json({ error: error.message });
     }
 });

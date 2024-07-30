@@ -5,81 +5,98 @@ import Search from '../components/Search';
 import '../styles/Inventory.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
-function Inventory() {
-    const { partNumber } = useParams();
-    const [part, setPart] = useState(null);
+function SerialNumber() {
+    const { serialNumber } = useParams(); // Change here
+    const [serial, setSerial] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
+        serial_number: '',
         part_number: '',
-        quantity: '',
-        quantity_on_ebay: '',
-        quantity_sold: '',
-        item_description: '',
-        category: '',
-        manufacturer: '',
+        sold: false,
+        locations: '',
+        item_condition: '',
     });
+    const [error, setError] = useState(null);
 
     useEffect(() => {
-        if (partNumber) {
-            getPartNumber(partNumber);
+        if (serialNumber) {
+            getSerialNumber(serialNumber);
         }
-    }, [partNumber]);
+    }, [serialNumber]);
 
-    const getPartNumber = async (partNumber) => {
+    const getSerialNumber = async (serialNumber) => { // Change here
+        console.log(serialNumber)
         try {
-            const response = await axios.get(`http://localhost:8080/parts/${partNumber}`);
-            setPart(response.data);
+            const response = await axios.get(`http://localhost:8080/serials/${serialNumber}`);
+            console.log("serial number data:", response)
+            setSerial(response.data);
             setFormData({
+                serial_number: response.data.serial_number,
                 part_number: response.data.part_number,
-                quantity: response.data.quantity,
-                quantity_on_ebay: response.data.quantity_on_ebay,
-                quantity_sold: response.data.quantity_sold,
-                item_description: response.data.item_description,
-                category: response.data.category,
-                manufacturer: response.data.manufacturer,
+                sold: response.data.sold,
+                locations: response.data.locations,
+                item_condition: response.data.item_condition,
             });
+            setError(null); // Clear any previous error
         } catch (error) {
-            console.error('Error fetching part data:', error);
+            console.error('Error fetching serial data:', error);
+            setError('No serial data found.'); // Set an appropriate error message
+            setSerial(null); // Clear any previous data
         }
     };
 
     const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
+        const { name, value, type, checked } = e.target;
+        setFormData({ ...formData, [name]: type === 'checkbox' ? checked : value });
     };
 
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`http://localhost:8080/parts/${formData.part_number}`, formData);
-            setPart(response.data);
+            const response = await axios.put(`http://localhost:8080/serials/${formData.serial_number}`, formData);
+            setSerial(response.data);
             setEditMode(false);
         } catch (error) {
-            console.error('Error updating part data:', error);
+            console.error('Error updating serial data:', error);
         }
     };
 
     return (
         <div className='inventory container mt-4'>
             <Search />
-            {part ? (
+            {error ? (
+                <p>{error}</p>
+            ) : serial ? (
                 <div>
+                    <h3>Serial Number Details</h3>
                     <form onSubmit={handleFormSubmit} className='mb-4'>
                         <table className='table table-striped'>
                             <thead className='thead-dark'>
                                 <tr>
+                                    <th>Serial Number</th>
                                     <th>Part Number</th>
-                                    <th>Quantity</th>
-                                    <th>Quantity Sold</th>
-                                    <th>Quantity on eBay</th>
-                                    <th>Item Description</th>
-                                    <th>Category</th>
-                                    <th>Manufacturer</th>
+                                    <th>Sold</th>
+                                    <th>Locations</th>
+                                    <th>Item Condition</th>
                                     <th>Actions</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                <tr key={part.part_number}>
+                                <tr>
+                                    <td>
+                                        {editMode ? (
+                                            <input
+                                                type='text'
+                                                name='serial_number'
+                                                className='form-control'
+                                                value={formData.serial_number}
+                                                onChange={handleInputChange}
+                                                readOnly
+                                            />
+                                        ) : (
+                                            serial.serial_number
+                                        )}
+                                    </td>
                                     <td>
                                         {editMode ? (
                                             <input
@@ -90,85 +107,45 @@ function Inventory() {
                                                 onChange={handleInputChange}
                                             />
                                         ) : (
-                                            part.part_number
+                                            serial.part_number
                                         )}
                                     </td>
                                     <td>
                                         {editMode ? (
                                             <input
-                                                type='number'
-                                                name='quantity'
-                                                className='form-control'
-                                                value={formData.quantity}
+                                                type='checkbox'
+                                                name='sold'
+                                                checked={formData.sold}
                                                 onChange={handleInputChange}
                                             />
                                         ) : (
-                                            part.quantity
-                                        )}
-                                    </td>
-                                    <td>
-                                        {editMode ? (
-                                            <input
-                                                type='number'
-                                                name='quantity_sold'
-                                                className='form-control'
-                                                value={formData.quantity_sold}
-                                                onChange={handleInputChange}
-                                            />
-                                        ) : (
-                                            part.quantity_sold
-                                        )}
-                                    </td>
-                                    <td>
-                                        {editMode ? (
-                                            <input
-                                                type='number'
-                                                name='quantity_on_ebay'
-                                                className='form-control'
-                                                value={formData.quantity_on_ebay}
-                                                onChange={handleInputChange}
-                                            />
-                                        ) : (
-                                            part.quantity_on_ebay
+                                            serial.sold ? 'Yes' : 'No'
                                         )}
                                     </td>
                                     <td>
                                         {editMode ? (
                                             <input
                                                 type='text'
-                                                name='item_description'
+                                                name='locations'
                                                 className='form-control'
-                                                value={formData.item_description}
+                                                value={formData.locations}
                                                 onChange={handleInputChange}
                                             />
                                         ) : (
-                                            part.item_description
+                                            serial.locations
                                         )}
                                     </td>
                                     <td>
                                         {editMode ? (
                                             <input
                                                 type='text'
-                                                name='category'
+                                                name='item_condition'
                                                 className='form-control'
-                                                value={formData.category}
+                                                value={formData.item_condition}
                                                 onChange={handleInputChange}
                                             />
                                         ) : (
-                                            part.category
-                                        )}
-                                    </td>
-                                    <td>
-                                        {editMode ? (
-                                            <input
-                                                type='text'
-                                                name='manufacturer'
-                                                className='form-control'
-                                                value={formData.manufacturer}
-                                                onChange={handleInputChange}
-                                            />
-                                        ) : (
-                                            part.manufacturer
+                                            serial.item_condition
                                         )}
                                     </td>
                                     <td>
@@ -187,10 +164,10 @@ function Inventory() {
                     </form>
                 </div>
             ) : (
-                <p>No part data found.</p>
+                <p>No serial data found.</p>
             )}
         </div>
     );
 }
 
-export default Inventory;
+export default SerialNumber;
