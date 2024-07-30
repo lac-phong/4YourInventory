@@ -34,6 +34,22 @@ export async function getItemByPartNumber(part_number) {
         throw new Error('Failed to retrieve item by part number: ' + error.message);
     }
 }
+export async function getItemBySerialNumber(serial_number) {
+    const sql = `
+        SELECT * FROM movedbtwo.serials
+        WHERE serial_number = ?;
+    `;
+    try {
+        const [rows] = await pool.query(sql, [serial_number]);
+        if (rows.length) {
+            return rows[0];
+        } else {
+            throw new Error('Item not found');
+        }
+    } catch (error) {
+        throw new Error('Failed to retrieve item by serial number: ' + error.message);
+    }
+}
 
 export async function insertPart(partNumber, locations, serialNumbers, item_description, category, manufacturer, item_condition) {
     const sqlInsertPart = `
@@ -95,6 +111,30 @@ export async function updatePart(part_number, updates) {
             return { part_number, quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer };
         } else {
             throw new Error('Part not found or no update needed');
+        }
+    } catch (error) {
+        throw new Error('Database operation failed: ' + error.message);
+    }
+}
+
+export async function updateSerial(serial_number, updates) {
+    const { part_number, sold, locations, item_condition } = updates;
+
+    const sql = `
+        UPDATE movedbtwo.serials
+        SET part_number = ?, sold = ?, locations = ?, item_condition = ?
+        WHERE serial_number = ?;
+    `;
+
+    try {
+        console.log('Update SQL:', sql);
+        console.log('Parameters:', [part_number, sold, locations, item_condition, serial_number]);
+
+        const [result] = await pool.query(sql, [part_number, sold, locations, item_condition, serial_number]);
+        if (result.affectedRows) {
+            return { serial_number, part_number, sold, locations, item_condition };
+        } else {
+            throw new Error('Serial not found or no update needed');
         }
     } catch (error) {
         throw new Error('Database operation failed: ' + error.message);
