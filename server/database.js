@@ -18,15 +18,33 @@ const pool = mysql.createPool({
 
 // ------------------------------------------------------------- PART NUMBERS -------------------------------------------------------------------------//
 
-export async function getItemByPartNumber(part_number) {
+export async function getItemByPartNumberWithSerials(part_number) {
     const sql = `
-        SELECT * FROM movedbtwo.parts
-        WHERE part_number = ?;
+        SELECT p.*, s.id AS serial_id, s.serial_number, s.sold, s.locations, s.item_condition
+        FROM movedbtwo.parts p
+        LEFT JOIN movedbtwo.serials s ON p.part_number = s.part_number
+        WHERE p.part_number = ?;
     `;
     try {
         const [rows] = await pool.query(sql, [part_number]);
         if (rows.length) {
-            return rows[0];
+            const part = {
+                part_number: rows[0].part_number,
+                quantity: rows[0].quantity,
+                quantity_on_ebay: rows[0].quantity_on_ebay,
+                quantity_sold: rows[0].quantity_sold,
+                item_description: rows[0].item_description,
+                category: rows[0].category,
+                manufacturer: rows[0].manufacturer,
+                serials: rows.map(row => ({
+                    serial_id: row.serial_id,
+                    serial_number: row.serial_number,
+                    sold: row.sold ? row.sold.readUInt8(0) : 0, // Convert buffer to integer
+                    locations: row.locations,
+                    item_condition: row.item_condition
+                }))
+            };
+            return part;
         } else {
             throw new Error('Item not found');
         }
@@ -37,12 +55,13 @@ export async function getItemByPartNumber(part_number) {
 
 export async function getItemBySerialNumber(serial_number) {
     const sql = `
-        SELECT * FROM movedbtwo.serials
+        SELECT serial_number, part_number, CAST(sold AS UNSIGNED) AS sold, locations, item_condition FROM movedbtwo.serials
         WHERE serial_number = ?;
     `;
     try {
         const [rows] = await pool.query(sql, [serial_number]);
         if (rows.length) {
+            console.log("Backend fetch result with cast:", rows[0]); // Log the result with cast
             return rows[0];
         } else {
             throw new Error('Item not found');

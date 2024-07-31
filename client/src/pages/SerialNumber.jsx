@@ -24,24 +24,22 @@ function SerialNumber() {
         }
     }, [serialNumber]);
 
-    const getSerialNumber = async (serialNumber) => { // Change here
-        console.log(serialNumber)
+    const getSerialNumber = async (serialNumber) => {
         try {
             const response = await axios.get(`http://localhost:8080/serials/${serialNumber}`);
-            console.log("serial number data:", response)
+            console.log("Frontend received data:", response.data); // Log the data
             setSerial(response.data);
             setFormData({
                 serial_number: response.data.serial_number,
                 part_number: response.data.part_number,
-                sold: response.data.sold,
+                sold: response.data.sold === 1, // Ensure boolean interpretation
                 locations: response.data.locations,
                 item_condition: response.data.item_condition,
             });
-            setError(null); // Clear any previous error
         } catch (error) {
             console.error('Error fetching serial data:', error);
-            setError('No serial data found.'); // Set an appropriate error message
-            setSerial(null); // Clear any previous data
+            setError('No serial data found.');
+            setSerial(null);
         }
     };
 

@@ -3,7 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 
 import {
-    getItemByPartNumber,
+    getItemByPartNumberWithSerials,
     getItemBySerialNumber,
     insertPart,
     updatePart,
@@ -28,7 +28,7 @@ app.use(cors({
 app.get("/parts/:part_number", async (req, res) => {
     const { part_number } = req.params;
     try {
-        const parts = await getItemByPartNumber(part_number);
+        const parts = await getItemByPartNumberWithSerials(part_number);
         res.json(parts);
     } catch (error) {
         res.status(404).json({ error: error.message });
@@ -39,6 +39,7 @@ app.get("/serials/:serial_number", async (req, res) => {
     const { serial_number } = req.params;
     try {
         const serials = await getItemBySerialNumber(serial_number);
+        console.log("Backend data:", serials); // Add this line
         res.json(serials);
     } catch (error) {
         res.status(404).json({ error: error.message });
@@ -86,14 +87,21 @@ app.put("/serials/:serial_number", async (req, res) => {
     }
 });
 
+
 // EXTERNAL: mark serial numbers as sold
 app.put("/serials", async (req, res) => {
     const { partNumber, serialNumbers } = req.body;
     if (!partNumber || !serialNumbers || !serialNumbers.length) {
         return res.status(400).json({ error: 'Part number and serial numbers are required' });
     }
-    const result = await markSerialNumbersAsSold(partNumber, serialNumbers);
-    res.json(result);
+
+    try {
+        const result = await markSerialNumbersAsSold(partNumber, serialNumbers);
+        res.json(result);
+    } catch (error) {
+        console.error('Error updating serial numbers:', error.message);
+        res.status(500).json({ error: 'An error occurred while updating serial numbers: ' + error.message });
+    }
 });
 
 // Start the server
