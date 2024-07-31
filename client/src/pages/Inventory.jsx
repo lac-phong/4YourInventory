@@ -185,6 +185,31 @@ function Inventory() {
                             </tbody>
                         </table>
                     </form>
+                    {part.serials && part.serials.length > 0 && (
+                        <div>
+                            <h3>Serial Numbers</h3>
+                            <table className='table table-striped'>
+                                <thead className='thead-dark'>
+                                    <tr>
+                                        <th>Serial Number</th>
+                                        <th>Sold</th>
+                                        <th>Locations</th>
+                                        <th>Item Condition</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {part.serials.map((serial) => (
+                                        <tr key={serial.serial_id}>
+                                            <td>{serial.serial_number}</td>
+                                            <td>{serial.sold === 1 ? 'Yes' : 'No'}</td>
+                                            <td>{serial.locations}</td>
+                                            <td>{serial.item_condition}</td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        </div>
+                    )}
                 </div>
             ) : (
                 <p>No part data found.</p>
