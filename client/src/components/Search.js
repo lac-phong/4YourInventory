@@ -10,11 +10,13 @@ function Search() {
     const handleSubmit = (event) => {
         event.preventDefault();
         if (searchType === "part_number") {
-            console.log('Navigating to:', `/inventory/${input}`);
             navigate(`/inventory/${input}`);
         } else if (searchType === "serial_number") {
-            console.log('Navigating to:', `/serials/${input}`);
             navigate(`/serials/${input}`);
+        } else if (searchType === "manufacturer") {
+            navigate(`/parts/manufacturer/${input}`);
+        } else if (searchType === "category") {
+            navigate(`/parts/category/${input}`);
         }
     };
 
@@ -29,6 +31,8 @@ function Search() {
                 >
                     <option value="part_number">Part Number</option>
                     <option value="serial_number">Serial Number</option>
+                    <option value="manufacturer">Manufacturer</option>
+                    <option value="category">Category</option>
                 </select>
                 <input 
                     type="text" 

@@ -214,6 +214,36 @@ export async function markSerialNumbersAsSold(partNumber, serialNumbers) {
     }
 }
 
+// MANUFACTURER SEARCH
+export async function getPartsByManufacturer(manufacturer) {
+    const sql = `
+        SELECT part_number, quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer
+        FROM movedbtwo.parts
+        WHERE TRIM(LOWER(manufacturer)) = TRIM(LOWER(?));
+    `;
+    try {
+        const [rows] = await pool.query(sql, [manufacturer]);
+        return rows;
+    } catch (error) {
+        throw new Error('Failed to retrieve parts by manufacturer: ' + error.message);
+    }
+}
+
+// CATEGORY SEARCH
+export async function getPartsByCategory(category) {
+    const sql = `
+        SELECT part_number, quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer
+        FROM movedbtwo.parts
+        WHERE TRIM(LOWER(category)) = TRIM(LOWER(?));
+    `;
+    try {
+        const [rows] = await pool.query(sql, [category]);
+        return rows;
+    } catch (error) {
+        throw new Error('Failed to retrieve parts by category: ' + error.message);
+    }
+}
+
 // INTERNAL FUNCTION
 async function checkPartExists(partNumber) {
     const sql = `
