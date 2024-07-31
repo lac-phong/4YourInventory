@@ -40,7 +40,7 @@ export default function Login() {
       <MDBRow>
         <MDBCol sm='6'>
           <div className='d-flex flex-row ps-5 pt-5'>
-            <MDBIcon fas icon="crow fa-3x me-3" style={{ color: '#709085' }}/>
+            <i class="fab fa-ebay display-5 pr-5 text-success" style={{ width:90 }}></i>
             <span className="h1 fw-bold mb-0">4YourBusiness Inc.</span>
           </div>
 
@@ -54,7 +54,7 @@ export default function Login() {
               <Form.Group id="password" className="mb-4 mx-5 w-100">
                 <MDBInput wrapperClass='mb-4' label='Password' id='formControlLg' type='password' size="lg" ref={passwordRef} required />
               </Form.Group>
-              <MDBBtn disabled={loading} className="mb-4 px-5 mx-5 w-100" color='info' size='lg'>Login</MDBBtn>
+              <MDBBtn disabled={loading} className="mb-4 px-5 mx-5 w-100" color='success' size='lg'>Login</MDBBtn>
             </Form>
             <p className="small mb-5 pb-lg-3 ms-5">
               <a className="text-muted" href="/forgotpassword">Forgot password?</a>
@@ -66,7 +66,7 @@ export default function Login() {
         </MDBCol>
 
         <MDBCol sm='6' className='d-none d-sm-block px-0'>
-          <img src="https://mdbcdn.b-cdn.net/img/Photos/new-templates/bootstrap-login-form/img3.webp"
+          <img src="https://images.unsplash.com/photo-1680095448731-a53cd40462c0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8fDA%3D"
             alt="Login image" className="w-100" style={{objectFit: 'cover', objectPosition: 'left'}} />
         </MDBCol>
       </MDBRow>

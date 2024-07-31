@@ -8,7 +8,9 @@ import {
     insertPart,
     updatePart,
     updateSerial,
-    markSerialNumbersAsSold
+    markSerialNumbersAsSold,
+    getPartsByManufacturer,
+    getPartsByCategory
 } from './database.js';
 
 dotenv.config();
@@ -101,6 +103,28 @@ app.put("/serials", async (req, res) => {
     } catch (error) {
         console.error('Error updating serial numbers:', error.message);
         res.status(500).json({ error: 'An error occurred while updating serial numbers: ' + error.message });
+    }
+});
+
+// EXTERNAL: search by manufacturer
+app.get("/parts/manufacturer/:manufacturer", async (req, res) => {
+    const { manufacturer } = req.params;
+    try {
+        const parts = await getPartsByManufacturer(manufacturer);
+        res.json(parts);
+    } catch (error) {
+        res.status(404).json({ error: error.message });
+    }
+});
+
+// EXTERNAL: search by manufacturer
+app.get("/parts/category/:category", async (req, res) => {
+    const { category } = req.params;
+    try {
+        const parts = await getPartsByCategory(category);
+        res.json(parts);
+    } catch (error) {
+        res.status(404).json({ error: error.message });
     }
 });
 

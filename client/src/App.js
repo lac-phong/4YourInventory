@@ -13,7 +13,8 @@ import { AuthProvider } from './contexts/AuthContext';
 import Signup from './pages/Signup';
 import PrivateRoute from './components/PrivateRoutes';
 import ForgotPassword from './pages/forgotpassword';
-
+import ManufacturerSearchResults from "./pages/ManufacturerSearchResults"; // Import the new component
+import CategorySearchResults from "./pages/CategorySearchResults"; // Import the new component
 
 function Layout() {
   const location = useLocation();
@@ -33,6 +34,8 @@ function Layout() {
           <Route path="/selling" element={<Selling />} />
           <Route path="/inventory/:partNumber" element={<Inventory />} />
           <Route path="/serials/:serialNumber" element={<SerialNumber />} />
+          <Route path="/parts/manufacturer/:manufacturer" element={<ManufacturerSearchResults />} />
+          <Route path="/parts/category/:category" element={<CategorySearchResults />} />
         </Route>
       </Routes>
     </div>
