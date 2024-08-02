@@ -3,3 +3,27 @@
     height: 100%;
   }
 }
+
+.login-image-container {
+  height: 100vh; /* Set the desired height for the image container */
+  overflow: hidden;
+}
+
+.login-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image covers the container without warping */
+  object-position: center; /* Adjusts the position of the image within the container */
+}
+
+.h-custom-2 {
+  height: calc(100% - 80px);
+}
+
+.display-3 {
+  font-size: 3rem; /* Increase the font size of the heading */
+}
+
+.d-flex.flex-column.justify-content-center.h-custom-2 {
+  width: 80%; /* Custom width to make the text box area wider */
+}
