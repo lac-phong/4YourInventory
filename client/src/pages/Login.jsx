@@ -40,12 +40,12 @@ export default function Login() {
       <MDBRow>
         <MDBCol sm='6'>
           <div className='d-flex flex-row ps-5 pt-5'>
-            <i class="fab fa-ebay display-5 pr-5 text-success" style={{ width:90 }}></i>
-            <span className="h1 fw-bold mb-0">4YourBusiness Inc.</span>
+            <i className="fab fa-ebay display-5 pr-5 text-success" style={{ width: 90 }}></i>
+            <span className="h1 fw-bold mb-0 display-4">4YourBusiness Inc.</span>
           </div>
 
-          <div className='d-flex flex-column justify-content-center h-custom-2 w-75 pt-4'>
-            <h3 className="fw-normal mb-3 ps-5 pb-3" style={{letterSpacing: '1px'}}>Log in</h3>
+          <div className='d-flex flex-column justify-content-center h-custom-2 pt-4' style={{ width: '85%' }}> {/* Custom width */}
+            <h3 className="fw-normal mb-3 ps-5 pb-3" style={{ letterSpacing: '1px' }}>Log in</h3>
             {error && <Alert variant="danger" className="mx-5">{error}</Alert>}
             <Form onSubmit={handleSubmit}>
               <Form.Group id="email" className="mb-4 mx-5 w-100">
@@ -66,8 +66,10 @@ export default function Login() {
         </MDBCol>
 
         <MDBCol sm='6' className='d-none d-sm-block px-0'>
-          <img src="https://images.unsplash.com/photo-1680095448731-a53cd40462c0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8fDA%3D"
-            alt="Login image" className="w-100" style={{objectFit: 'cover', objectPosition: 'left'}} />
+          <div className="login-image-container">
+            <img src="https://images.unsplash.com/photo-1680095448731-a53cd40462c0?w=800&auto=format&fit=crop&q=60&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxzZWFyY2h8M3x8dmVydGljYWwlMjB3YWxscGFwZXJ8ZW58MHx8MHx8fDA%3D"
+              alt="Login image" className="login-image" />
+          </div>
         </MDBCol>
       </MDBRow>
     </MDBContainer>
