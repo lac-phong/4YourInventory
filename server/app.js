@@ -1,136 +1,96 @@
-import cors from 'cors';
 import express from 'express';
-import dotenv from 'dotenv';
-
-import {
-    getItemByPartNumberWithSerials,
-    getItemBySerialNumber,
-    insertPart,
-    updatePart,
-    updateSerial,
-    markSerialNumbersAsSold,
-    getPartsByManufacturer,
-    getPartsByCategory
-} from './database.js';
-
-dotenv.config();
+import bodyParser from 'body-parser';
+import { updateDatabaseWithEbayData } from './ebayService.js';
+import { getItemByPartNumberWithSerials, getItemBySerialNumber, insertPart, updatePart, updateSerial, deletePart, deleteSerial } from './database.js';
 
 const app = express();
+const PORT = process.env.PORT || 8080;
 
-app.use(express.json());
-app.use(cors({
-    origin: 'http://localhost:3000',
-    credentials: true
-}));
+app.use(bodyParser.json());
 
-// ------------------------------------------------------------------------------------------------------------------------------------------------//
-
-// ------------------------------------------------------------- PARTS ---------------------------------------------------------------------------//
-
-app.get("/parts/:part_number", async (req, res) => {
-    const { part_number } = req.params;
+// Endpoint to get item by part number with serials
+app.get('/api/items/part/:part_number', async (req, res) => {
     try {
-        const parts = await getItemByPartNumberWithSerials(part_number);
-        res.json(parts);
+        const part = await getItemByPartNumberWithSerials(req.params.part_number);
+        res.json(part);
     } catch (error) {
         res.status(404).json({ error: error.message });
     }
 });
 
-app.get("/serials/:serial_number", async (req, res) => {
-    const { serial_number } = req.params;
+// Endpoint to get item by serial number
+app.get('/api/items/serial/:serial_number', async (req, res) => {
     try {
-        const serials = await getItemBySerialNumber(serial_number);
-        console.log("Backend data:", serials); // Add this line
-        res.json(serials);
+        const serial = await getItemBySerialNumber(req.params.serial_number);
+        res.json(serial);
     } catch (error) {
         res.status(404).json({ error: error.message });
     }
 });
 
-// EXTERNAL: insert a new part
-app.post("/parts", async (req, res) => {
-    const { partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition } = req.body;
-    const newPart = await insertPart(partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition);
-    res.json(newPart);
-});
-
-// EXTERNAL: update a part
-app.put("/parts/:part_number", async (req, res) => {
-    const { part_number } = req.params; // Correct extraction of part_number from req.params
-    const updates = req.body;
-
-    console.log('Part Number:', part_number);
-    console.log('Updates:', updates);
-
+// Endpoint to insert a new part and its serials
+app.post('/api/items', async (req, res) => {
     try {
-        const updatedPart = await updatePart(part_number, updates);
-        res.json(updatedPart);
-    } catch (error) {
-        console.error('Failed to update part:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-// EXTERNAL: update a serial
-app.put("/serials/:serial_number", async (req, res) => {
-    const { serial_number } = req.params; // Correct extraction of serial_number from req.params
-    const updates = req.body;
-
-    console.log('Serial Number:', serial_number);
-    console.log('Updates:', updates);
-
-    try {
-        const updatedSerial = await updateSerial(serial_number, updates);
-        res.json(updatedSerial);
-    } catch (error) {
-        console.error('Failed to update serial:', error);
-        res.status(500).json({ error: error.message });
-    }
-});
-
-
-// EXTERNAL: mark serial numbers as sold
-app.put("/serials", async (req, res) => {
-    const { partNumber, serialNumbers } = req.body;
-    if (!partNumber || !serialNumbers || !serialNumbers.length) {
-        return res.status(400).json({ error: 'Part number and serial numbers are required' });
-    }
-
-    try {
-        const result = await markSerialNumbersAsSold(partNumber, serialNumbers);
+        const { partNumber, locations, serialNumbers, item_description, category, manufacturer, item_condition } = req.body;
+        const result = await insertPart({ partNumber, locations, serialNumbers, item_description, category, manufacturer, item_condition });
         res.json(result);
     } catch (error) {
-        console.error('Error updating serial numbers:', error.message);
-        res.status(500).json({ error: 'An error occurred while updating serial numbers: ' + error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// EXTERNAL: search by manufacturer
-app.get("/parts/manufacturer/:manufacturer", async (req, res) => {
-    const { manufacturer } = req.params;
+// Endpoint to update part details
+app.put('/api/items/part/:part_number', async (req, res) => {
     try {
-        const parts = await getPartsByManufacturer(manufacturer);
-        res.json(parts);
+        const updates = req.body;
+        const result = await updatePart(req.params.part_number, updates);
+        res.json(result);
     } catch (error) {
-        res.status(404).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// EXTERNAL: search by manufacturer
-app.get("/parts/category/:category", async (req, res) => {
-    const { category } = req.params;
+// Endpoint to update serial details
+app.put('/api/items/serial/:serial_number', async (req, res) => {
     try {
-        const parts = await getPartsByCategory(category);
-        res.json(parts);
+        const updates = req.body;
+        const result = await updateSerial(req.params.serial_number, updates);
+        res.json(result);
     } catch (error) {
-        res.status(404).json({ error: error.message });
+        res.status(500).json({ error: error.message });
     }
 });
 
-// Start the server
-const port = process.env.PORT || 8080;
-app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+// Endpoint to delete part by part number
+app.delete('/api/items/part/:part_number', async (req, res) => {
+    try {
+        const result = await deletePart(req.params.part_number);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
 });
 
+// Endpoint to delete serial by serial number
+app.delete('/api/items/serial/:serial_number', async (req, res) => {
+    try {
+        const result = await deleteSerial(req.params.serial_number);
+        res.json(result);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// Endpoint to update the database with eBay data
+app.post('/api/ebay/update', async (req, res) => {
+    try {
+        await updateDatabaseWithEbayData();
+        res.json({ message: 'Database updated with eBay data.' });
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+app.listen(PORT, () => {
+    console.log(`Server is running on port ${PORT}`);
+});

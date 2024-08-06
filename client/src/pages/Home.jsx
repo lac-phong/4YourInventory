@@ -2,6 +2,7 @@ import React from 'react';
 import Search from "../components/Search";
 import BannerImage from "../assets/homeBack.png";
 import "../styles/Home.css";
+import UpdateEbayButton from '../components/UpdateEbayButton';
 
 function Home() {
   return (
@@ -11,6 +12,7 @@ function Home() {
       </div>
       <div className='searchBar'>
         <Search />
+        <UpdateEbayButton />
       </div>  
     </div>
   )
