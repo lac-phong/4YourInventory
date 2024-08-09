@@ -79,9 +79,24 @@ function Inventory() {
     };
 
     if (loading) {
-        return <div>Loading...</div>; // Display a loading message or spinner
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: 'green'
+            }}>
+                <div className="spinner-border" role="status" style={{ marginRight: '10px' }}>
+                    <span className="sr-only">Loading...</span>
+                </div>
+                LOADING
+            </div>
+        );
     }
-
+    
     return (
         <div className='inventory container mt-4'>
             <Search />
