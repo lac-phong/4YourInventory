@@ -8,7 +8,7 @@ function Dash() {
   const navigate = useNavigate();
 
   const handleGetStarted = () => {
-    navigate('/home');  // Navigate to the home page
+    navigate('/search');  // Navigate to the home page
   };
 
   return (
