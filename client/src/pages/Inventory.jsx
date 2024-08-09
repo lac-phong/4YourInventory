@@ -35,25 +35,38 @@ function Inventory() {
             
             // Fetch quantity on eBay
             const quantity = await axios.get(`http://localhost:8080/item/${partNumber}`);
+
+            if (response.data.quantity_on_ebay === quantity.data.quantity) {
+                const updatedFormData = {
+                    part_number: response.data.part_number,
+                    quantity: response.data.quantity,
+                    quantity_on_ebay: response.data.quantity_on_ebay,
+                    quantity_sold: response.data.quantity_sold,
+                    item_description: response.data.item_description,
+                    category: response.data.category,
+                    manufacturer: response.data.manufacturer,
+                };
+                
+                setFormData(updatedFormData);
+                setPart(response.data);
+            } else {
+                const updatedFormData = {
+                    part_number: response.data.part_number,
+                    quantity: response.data.quantity,
+                    quantity_on_ebay: quantity.data.quantity,
+                    quantity_sold: response.data.quantity_sold,
+                    item_description: response.data.item_description,
+                    category: response.data.category,
+                    manufacturer: response.data.manufacturer,
+                };
+                
+                setFormData(updatedFormData);
+                // Update the part with the fetched form data
+                const updatedResponse = await axios.put(`http://localhost:8080/parts/${partNumber}`, updatedFormData);
+                // Set the part state with the updated data
+                setPart(updatedResponse.data);
+            }
             
-            // Update the formData state after fetching the above data
-            const updatedFormData = {
-                part_number: response.data.part_number,
-                quantity: response.data.quantity,
-                quantity_on_ebay: quantity.data.quantity,
-                quantity_sold: response.data.quantity_sold,
-                item_description: response.data.item_description,
-                category: response.data.category,
-                manufacturer: response.data.manufacturer,
-            };
-            
-            setFormData(updatedFormData);
-        
-            // Update the part with the fetched form data
-            const updatedResponse = await axios.put(`http://localhost:8080/parts/${partNumber}`, updatedFormData);
-            
-            // Set the part state with the updated data
-            setPart(updatedResponse.data);
         } catch (error) {
             console.error('Error fetching part data:', error);
         } finally {

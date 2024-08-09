@@ -162,26 +162,32 @@ app.get('/item/:part_number', async (req, res) => {
             'Authorization': `Bearer ${accessToken}`,
             'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
         };
-
+        
         const response = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?q=${part_number}&limit=100`, {
             headers: headers
         });
+
         const data = await response.json();
 
         const seller4yourbusinessItemIds = data.itemSummaries
             .filter(item => item.seller.username === '4yourbusiness')
             .map(item => item.itemId);
 
-        const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/${seller4yourbusinessItemIds}`, {
-            headers: headers
-        });
-        const itemJson = await itemDetails.json();
+        let result = { quantity: 0 };
 
-        const result = {
-            quantity: itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity
-        };
+        if (seller4yourbusinessItemIds.length !== 0) {
+            const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/${seller4yourbusinessItemIds}`, {
+                headers: headers
+            });
+            const itemJson = await itemDetails.json();
 
+            result = {
+                quantity: itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity
+            };
+        }
+        
         res.json(result);
+        
     } catch (error) {
         console.error(error);
         res.status(500).json({ error: 'Error fetching data' });
