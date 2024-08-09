@@ -40,7 +40,7 @@ function Layout() {
       </Routes>
     </div>
     </AuthProvider>
-  );
+  ); 
 }
 
 function App() {

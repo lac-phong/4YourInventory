@@ -34,21 +34,12 @@ useEffect(() => {
       setLoading(false);
     });
 
-    // Add event listener for 'beforeunload'
-    window.addEventListener('beforeunload', handleBeforeUnload);
-
     return () => {
       unsubscribe();
       // Remove the event listener when the component unmounts
-      window.removeEventListener('beforeunload', handleBeforeUnload);
     };
   }, []);
 
-  // Function to handle the 'beforeunload' event
-  const handleBeforeUnload = () => {
-    // Sign out the user
-    auth.signOut();
-  };
 
   const value = {
     currentUser,
