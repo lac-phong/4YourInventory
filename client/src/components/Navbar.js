@@ -33,7 +33,7 @@ export default function Navbar() {
         <img src={Logo} />
         <div className="hiddenLinks">
           <Link to="/home"> Home </Link>
-          <Link to="/dashboard"> Dashboard </Link>
+          <Link to="/search"> Search </Link>
           <Link to="/addproduct"> Add Product </Link>
           <Link to="/selling"> Selling </Link>
           <Link to="/" className="logout-link" onClick={handleLogout}> Logout </Link>
@@ -41,7 +41,7 @@ export default function Navbar() {
       </div>
       <div className="rightSide">
         <Link to="/home"> Home </Link>
-        <Link to="/dashboard"> Dashboard </Link>
+        <Link to="/search"> Search </Link>
         <Link to="/addproduct"> Add Product </Link>
         <Link to="/selling"> Selling </Link>
         <Link to="/" className="logout-link" onClick={handleLogout}> Logout </Link>

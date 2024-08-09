@@ -8,8 +8,9 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function Inventory() {
     const { partNumber } = useParams();
     const [part, setPart] = useState(null);
-    const [loading, setLoading] = useState(true); // Loading state
+    const [loading, setLoading] = useState(true);
     const [editMode, setEditMode] = useState(false);
+    const [filter, setFilter] = useState('All'); // Filter state
     const [formData, setFormData] = useState({
         part_number: '',
         quantity: '',
@@ -28,51 +29,32 @@ function Inventory() {
 
     const getPartNumber = async (partNumber) => {
         try {
-            setLoading(true); // Set loading state to true before fetching data
-        
-            // Fetch part data
+            setLoading(true);
             const response = await axios.get(`http://localhost:8080/parts/${partNumber}`);
-            
-            // Fetch quantity on eBay
             const quantity = await axios.get(`http://localhost:8080/item/${partNumber}`);
 
-            if (response.data.quantity_on_ebay === quantity.data.quantity) {
-                const updatedFormData = {
-                    part_number: response.data.part_number,
-                    quantity: response.data.quantity,
-                    quantity_on_ebay: response.data.quantity_on_ebay,
-                    quantity_sold: response.data.quantity_sold,
-                    item_description: response.data.item_description,
-                    category: response.data.category,
-                    manufacturer: response.data.manufacturer,
-                };
-                
-                setFormData(updatedFormData);
-                setPart(response.data);
-            } else {
-                const updatedFormData = {
-                    part_number: response.data.part_number,
-                    quantity: response.data.quantity,
-                    quantity_on_ebay: quantity.data.quantity,
-                    quantity_sold: response.data.quantity_sold,
-                    item_description: response.data.item_description,
-                    category: response.data.category,
-                    manufacturer: response.data.manufacturer,
-                };
-                
-                setFormData(updatedFormData);
-                // Update the part with the fetched form data
-                const updatedResponse = await axios.put(`http://localhost:8080/parts/${partNumber}`, updatedFormData);
-                // Set the part state with the updated data
-                setPart(updatedResponse.data);
-            }
+            const updatedFormData = {
+                part_number: response.data.part_number,
+                quantity: response.data.quantity,
+                quantity_on_ebay: quantity.data.quantity,
+                quantity_sold: response.data.quantity_sold,
+                item_description: response.data.item_description,
+                category: response.data.category,
+                manufacturer: response.data.manufacturer,
+            };
             
+            setFormData(updatedFormData);
+
+            if (response.data.quantity_on_ebay !== quantity.data.quantity) {
+                await axios.put(`http://localhost:8080/parts/${partNumber}`, updatedFormData);
+            }
+
+            setPart(response.data);
         } catch (error) {
             console.error('Error fetching part data:', error);
         } finally {
-            setLoading(false); // Set loading state to false after data is fetched
+            setLoading(false);
         }
-        
     };
 
     const handleInputChange = (e) => {
@@ -90,6 +72,17 @@ function Inventory() {
             console.error('Error updating part data:', error);
         }
     };
+
+    const handleFilterChange = (e) => {
+        setFilter(e.target.value);
+    };
+
+    const filteredSerials = part?.serials?.filter(serial => {
+        if (filter === 'All') return true;
+        if (filter === 'Sold') return serial.sold === 1;
+        if (filter === 'Not Sold') return serial.sold === 0;
+        return true;
+    }) || [];
 
     if (loading) {
         return (
@@ -236,7 +229,15 @@ function Inventory() {
                             </tbody>
                         </table>
                     </form>
-                    {part.serials && part.serials.length > 0 && (
+                    <div className='mb-4'>
+                        <label htmlFor='filter'>Filter by Sold Status: </label>
+                        <select id='filter' className='form-control' value={filter} onChange={handleFilterChange}>
+                            <option value='All'>All</option>
+                            <option value='Sold'>Sold</option>
+                            <option value='Not Sold'>Not Sold</option>
+                        </select>
+                    </div>
+                    {filteredSerials.length > 0 ? (
                         <div>
                             <h3>Serial Numbers</h3>
                             <table className='table table-striped'>
@@ -249,7 +250,7 @@ function Inventory() {
                                     </tr>
                                 </thead>
                                 <tbody>
-                                    {part.serials.map((serial) => (
+                                    {filteredSerials.map((serial) => (
                                         <tr key={serial.serial_id}>
                                             <td>{serial.serial_number}</td>
                                             <td>{serial.sold === 1 ? 'Yes' : 'No'}</td>
@@ -260,6 +261,8 @@ function Inventory() {
                                 </tbody>
                             </table>
                         </div>
+                    ) : (
+                        <p>No serials found for the selected filter.</p>
                     )}
                 </div>
             ) : (

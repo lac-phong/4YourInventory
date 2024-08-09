@@ -169,21 +169,26 @@ app.get('/item/:part_number', async (req, res) => {
 
         const data = await response.json();
 
-        const seller4yourbusinessItemIds = data.itemSummaries
-            .filter(item => item.seller.username === '4yourbusiness')
-            .map(item => item.itemId);
-
         let result = { quantity: 0 };
+        
+        if (data.total !== 0) {
 
-        if (seller4yourbusinessItemIds.length !== 0) {
-            const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/${seller4yourbusinessItemIds}`, {
-                headers: headers
-            });
-            const itemJson = await itemDetails.json();
-
-            result = {
-                quantity: itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity
-            };
+            const seller4yourbusinessItemIds = data.itemSummaries
+                .filter(item => item.seller.username === '4yourbusiness')
+                .map(item => item.itemId);
+    
+            
+    
+            if (seller4yourbusinessItemIds.length !== 0) {
+                const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/${seller4yourbusinessItemIds}`, {
+                    headers: headers
+                });
+                const itemJson = await itemDetails.json();
+    
+                result = {
+                    quantity: itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity
+                };
+            }
         }
         
         res.json(result);
