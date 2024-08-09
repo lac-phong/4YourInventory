@@ -8,6 +8,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 function Inventory() {
     const { partNumber } = useParams();
     const [part, setPart] = useState(null);
+    const [loading, setLoading] = useState(true); // Loading state
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
         part_number: '',
@@ -27,20 +28,51 @@ function Inventory() {
 
     const getPartNumber = async (partNumber) => {
         try {
+            setLoading(true); // Set loading state to true before fetching data
+        
+            // Fetch part data
             const response = await axios.get(`http://localhost:8080/parts/${partNumber}`);
-            setPart(response.data);
-            setFormData({
-                part_number: response.data.part_number,
-                quantity: response.data.quantity,
-                quantity_on_ebay: response.data.quantity_on_ebay,
-                quantity_sold: response.data.quantity_sold,
-                item_description: response.data.item_description,
-                category: response.data.category,
-                manufacturer: response.data.manufacturer,
-            });
+            
+            // Fetch quantity on eBay
+            const quantity = await axios.get(`http://localhost:8080/item/${partNumber}`);
+
+            if (response.data.quantity_on_ebay === quantity.data.quantity) {
+                const updatedFormData = {
+                    part_number: response.data.part_number,
+                    quantity: response.data.quantity,
+                    quantity_on_ebay: response.data.quantity_on_ebay,
+                    quantity_sold: response.data.quantity_sold,
+                    item_description: response.data.item_description,
+                    category: response.data.category,
+                    manufacturer: response.data.manufacturer,
+                };
+                
+                setFormData(updatedFormData);
+                setPart(response.data);
+            } else {
+                const updatedFormData = {
+                    part_number: response.data.part_number,
+                    quantity: response.data.quantity,
+                    quantity_on_ebay: quantity.data.quantity,
+                    quantity_sold: response.data.quantity_sold,
+                    item_description: response.data.item_description,
+                    category: response.data.category,
+                    manufacturer: response.data.manufacturer,
+                };
+                
+                setFormData(updatedFormData);
+                // Update the part with the fetched form data
+                const updatedResponse = await axios.put(`http://localhost:8080/parts/${partNumber}`, updatedFormData);
+                // Set the part state with the updated data
+                setPart(updatedResponse.data);
+            }
+            
         } catch (error) {
             console.error('Error fetching part data:', error);
+        } finally {
+            setLoading(false); // Set loading state to false after data is fetched
         }
+        
     };
 
     const handleInputChange = (e) => {
@@ -59,6 +91,25 @@ function Inventory() {
         }
     };
 
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: 'green'
+            }}>
+                <div className="spinner-border" role="status" style={{ marginRight: '10px' }}>
+                    <span className="sr-only">Loading...</span>
+                </div>
+                LOADING
+            </div>
+        );
+    }
+    
     return (
         <div className='inventory container mt-4'>
             <Search />
