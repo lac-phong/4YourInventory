@@ -1,7 +1,7 @@
 import './App.css';
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Home from "./pages/Home";
+import Search from "./pages/Home";
 import Dashboard from "./pages/Dash";
 import AddProduct from "./pages/AddProduct";
 import Inventory from "./pages/Inventory";
@@ -28,8 +28,8 @@ function Layout() {
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} /> 
         <Route path="/" element={<PrivateRoute />}>
-          <Route path="/home" element={<Home />} />
-          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/home" element={<Dashboard />} />
+          <Route path="/search" element={<Search />} />
           <Route path="/addproduct" element={<AddProduct />} />
           <Route path="/selling" element={<Selling />} />
           <Route path="/inventory/:partNumber" element={<Inventory />} />

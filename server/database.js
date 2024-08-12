@@ -127,7 +127,8 @@ export async function updatePart(part_number, updates) {
 
         const [result] = await pool.query(sql, [quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer, part_number]);
         if (result.affectedRows) {
-            return { part_number, quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer };
+            // After the update, fetch the updated part including its serials
+            return await getItemByPartNumberWithSerials(part_number);
         } else {
             throw new Error('Part not found or no update needed');
         }
