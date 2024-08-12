@@ -1,0 +1,27 @@
+/* Search.css */
+.green-bg {
+    background-color: #eafaf1; /* Adjust the green shade as needed */
+    color: #333; /* Adjust text color for contrast */
+}
+
+img {
+    width: 700px;
+  }
+
+.imageCont{
+    margin-top: 50px;
+    text-align: center;
+    margin-bottom: 50px;
+}
+
+@media only screen and (max-width: 900px) {
+    img {
+        width: 400px;
+    }
+}
+
+@media only screen and (max-width: 600px) {
+    img {
+        width: 300px;
+    }
+}

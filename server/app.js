@@ -13,7 +13,10 @@ import {
     updateSerial,
     markSerialNumbersAsSold,
     getPartsByManufacturer,
-    getPartsByCategory
+    getPartsByCategory,
+    getAllCategories,
+    insertCategory,
+    deleteCategory
 } from './database.js';
 
 dotenv.config();
@@ -76,10 +79,21 @@ app.get("/serials/:serial_number", async (req, res) => {
 
 // EXTERNAL: insert a new part
 app.post("/parts", async (req, res) => {
-    const { partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition } = req.body;
-    const newPart = await insertPart(partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition);
-    res.json(newPart);
+    try {
+        const { partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition } = req.body;
+
+        if (!partNumber || !location || serialNumbers.length === 0 || !item_description || !category || !manufacturer || !item_condition) {
+            return res.status(400).json({ error: 'Please provide all required fields' });
+        }
+
+        const newPart = await insertPart(partNumber, location, serialNumbers, item_description, category, manufacturer, item_condition);
+        res.json(newPart);
+    } catch (error) {
+        console.error('Error inserting part:', error);
+        res.status(500).json({ error: 'Failed to add part' });
+    }
 });
+
 
 // EXTERNAL: update a part
 app.put("/parts/:part_number", async (req, res) => {
@@ -227,6 +241,60 @@ app.get('/item/:part_number', async (req, res) => {
         res.status(500).json({ error: 'Error fetching data' });
     }
 });
+
+// EXTERNAL: Get all unique categories
+app.get("/categories", async (req, res) => {
+    try {
+        const categories = await getAllCategories();
+        res.json(categories);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// EXTERNAL: insert a new category
+app.post("/categories", async (req, res) => {
+    try {
+        const { category } = req.body;
+
+        if (!category) {
+            return res.status(400).json({ error: 'Category is required' });
+        }
+
+        const newCategory = await insertCategory(category);
+        if (!newCategory.inserted) {
+            return res.status(409).json({ error: 'Category already exists' });
+        }
+
+        res.json(newCategory);
+    } catch (error) {
+        console.error('Error inserting category:', error);
+        res.status(500).json({ error: 'Failed to add category' });
+    }
+});
+
+// EXTERNAL: delete a category
+app.delete("/categories", async (req, res) => {
+    const { category } = req.body;
+
+    if (!category) {
+        return res.status(400).json({ error: 'Category is required' });
+    }
+
+    try {
+        const result = await deleteCategory(category);
+        if (result.deleted) {
+            res.json({ deleted: true });
+        } else {
+            res.status(404).json({ error: 'Category not found' });
+        }
+    } catch (error) {
+        console.error('Failed to delete category:', error);
+        res.status(500).json({ error: 'Failed to delete category' });
+    }
+});
+
+  
 
 // Start the server
 const port = process.env.PORT || 8080;
