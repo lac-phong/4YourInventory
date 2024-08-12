@@ -3,6 +3,7 @@ import express from 'express';
 import dotenv from 'dotenv';
 import fetch from 'node-fetch';
 import qs from 'querystring';
+import xml2js from 'xml2js';
 
 import {
     getItemByPartNumberWithSerials,
@@ -158,35 +159,68 @@ app.get('/item/:part_number', async (req, res) => {
 
     try {
         const accessToken = await getEbayAuthToken();
-        const headers = {
+        const itemSearchHeaders = {
             'Authorization': `Bearer ${accessToken}`,
             'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
+        }
+        const storeSearchHeaders = {
+            'X-EBAY-SOA-SECURITY-APPNAME': `${process.env.EBAY_APP_NAME}`,
+            'X-EBAY-SOA-OPERATION-NAME': 'findItemsIneBayStores',
+            'Content-Type': 'text/xml'
         };
         
-        const response = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?q=${part_number}&limit=100`, {
-            headers: headers
+        const storeSearchBody = `<?xml version="1.0" encoding="UTF-8"?>
+        <findItemsIneBayStoresRequest xmlns="http://www.ebay.com/marketplace/search/v1/services">
+          <keywords>${part_number}</keywords>
+          <storeName>4YourBusiness</storeName>
+          <outputSelector>StoreInfo</outputSelector>
+        </findItemsIneBayStoresRequest>`;
+        
+        const response = await fetch(`https://svcs.ebay.com/services/search/FindingService/v1`, {
+            method: 'POST',
+            headers: storeSearchHeaders,
+            body: storeSearchBody
         });
 
-        const data = await response.json();
+        const storeSearchText = await response.text();
+        const parser = new xml2js.Parser({ explicitArray: false });
+        const storeSearch = await parser.parseStringPromise(storeSearchText);
 
-        const seller4yourbusinessItemIds = data.itemSummaries
-            .filter(item => item.seller.username === '4yourbusiness')
-            .map(item => item.itemId);
-
-        let result = { quantity: 0 };
-
-        if (seller4yourbusinessItemIds.length !== 0) {
-            const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/${seller4yourbusinessItemIds}`, {
-                headers: headers
-            });
-            const itemJson = await itemDetails.json();
-
-            result = {
-                quantity: itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity
-            };
+        let itemIds = [];
+        if (storeSearch.findItemsIneBayStoresResponse.searchResult.item) {
+            itemIds = Array.isArray(storeSearch.findItemsIneBayStoresResponse.searchResult.item)
+                ? storeSearch.findItemsIneBayStoresResponse.searchResult.item.map(item => item.itemId)
+                : [storeSearch.findItemsIneBayStoresResponse.searchResult.item.itemId];
         }
-        
-        res.json(result);
+
+        const fetchItemDetails = async (itemId) => {
+            try {
+                const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/v1|${itemId}|0`, {
+                    headers: itemSearchHeaders
+                });
+                const itemJson = await itemDetails.json();
+                return {
+                    itemId: itemId,
+                    quantity: itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity
+                };
+            } catch (error) {
+                console.error(`Error fetching details for item ${itemId}:`, error);
+                return {
+                    itemId: itemId,
+                    quantity: 0,
+                    error: 'Failed to fetch item details'
+                };
+            }
+        };
+
+        const results = await Promise.all(itemIds.map(fetchItemDetails));
+
+        const totalQuantity = results.reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+        res.json({
+            items: results,
+            totalQuantity: totalQuantity
+        });
         
     } catch (error) {
         console.error(error);

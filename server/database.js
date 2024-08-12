@@ -123,7 +123,6 @@ export async function updatePart(part_number, updates) {
     `;
 
     try {
-        console.log('Update SQL:', sql);
         console.log('Parameters:', [quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer, part_number]);
 
         const [result] = await pool.query(sql, [quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer, part_number]);
@@ -147,7 +146,6 @@ export async function updateSerial(serial_number, updates) {
     `;
 
     try {
-        console.log('Update SQL:', sql);
         console.log('Parameters:', [part_number, sold, locations, item_condition, serial_number]);
 
         const [result] = await pool.query(sql, [part_number, sold, locations, item_condition, serial_number]);

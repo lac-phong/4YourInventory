@@ -36,7 +36,7 @@ function Inventory() {
             // Fetch quantity on eBay
             const quantity = await axios.get(`http://localhost:8080/item/${partNumber}`);
 
-            if (response.data.quantity_on_ebay === quantity.data.quantity) {
+            if (response.data.quantity_on_ebay === quantity.data.totalQuantity) {
                 const updatedFormData = {
                     part_number: response.data.part_number,
                     quantity: response.data.quantity,
@@ -53,7 +53,7 @@ function Inventory() {
                 const updatedFormData = {
                     part_number: response.data.part_number,
                     quantity: response.data.quantity,
-                    quantity_on_ebay: quantity.data.quantity,
+                    quantity_on_ebay: quantity.data.totalQuantity,
                     quantity_sold: response.data.quantity_sold,
                     item_description: response.data.item_description,
                     category: response.data.category,
