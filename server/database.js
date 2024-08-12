@@ -243,6 +243,78 @@ export async function getPartsByCategory(category) {
     }
 }
 
+// Function to get all unique categories
+export async function getAllCategories() {
+    const sql = `SELECT category FROM movedbtwo.unique_categories ORDER BY category;`;
+    try {
+        const [rows] = await pool.query(sql);
+        return rows.map(row => row.category);
+    } catch (error) {
+        throw new Error('Failed to retrieve categories: ' + error.message);
+    }
+}
+
+// Function to add a new category to the database
+export async function insertCategory(category) {
+    const sqlInsertCat = `
+        INSERT INTO unique_categories (category)
+        VALUES (?);
+    `;
+    const sqlSelectCat = 'SELECT category FROM unique_categories WHERE category = ?';
+    let connection;
+    try {
+        connection = await pool.getConnection(); // Use the connection pool
+
+        // Check if the category already exists
+        const [existingCat] = await connection.query(sqlSelectCat, [category]);
+
+        if (existingCat.length > 0) {
+            return { inserted: false }; // Category already exists
+        }
+
+        // Insert the new category
+        const [result] = await connection.query(sqlInsertCat, [category]);
+
+        if (!result.affectedRows) {
+            console.error('Category Insert failed, no rows affected');
+            throw new Error('Category Insert failed, no rows affected');
+        }
+
+        return { inserted: true };
+    } catch (error) {
+        console.error('Failed to insert category:', error);
+        throw new Error('Failed to insert category: ' + error.message);
+    } finally {
+        if (connection) connection.release(); 
+    }
+}
+
+// Function to delete a category from the database
+export async function deleteCategory(category) {
+    const sqlDeleteCat = 'DELETE FROM unique_categories WHERE category = ?';
+    let connection;
+
+    try {
+        connection = await pool.getConnection(); // Use the connection pool
+
+        // Delete the category
+        const [result] = await connection.query(sqlDeleteCat, [category]);
+        if (result.affectedRows === 0) {
+            console.error('Category Delete failed, no rows affected');
+            return { deleted: false };
+        }
+
+        return { deleted: true };
+    } catch (error) {
+        console.error('Failed to delete category:', error);
+        throw new Error('Failed to delete category: ' + error.message);
+    } finally {
+        if (connection) connection.release(); 
+    }
+}
+
+
+
 // INTERNAL FUNCTION
 async function checkPartExists(partNumber) {
     const sql = `

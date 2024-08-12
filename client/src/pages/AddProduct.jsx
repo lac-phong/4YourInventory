@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Button, Table, Alert } from 'react-bootstrap';
 import axios from 'axios';
+import CategoryDropdown from '../components/CategoryDropdown'; // Import the CategoryDropdown component
 
 function AddProduct() {
   const [partNumber, setPartNumber] = useState('');
@@ -8,6 +9,7 @@ function AddProduct() {
   const [serialNumbers, setSerialNumbers] = useState(['']);
   const [itemDescription, setItemDescription] = useState('');
   const [category, setCategory] = useState('');
+  const [newCategory, setNewCategory] = useState(''); // State to handle new category input
   const [manufacturer, setManufacturer] = useState('');
   const [itemCondition, setItemCondition] = useState('');
   const [error, setError] = useState(null);
@@ -50,44 +52,64 @@ function AddProduct() {
     setError(null);
 
     if (!partNumber || !location || serialNumbers.filter(serial => serial !== '').length === 0) {
-      setError('Please fill in all fields and add at least one serial number.');
-      return;
+        setError('Please fill in all fields and add at least one serial number.');
+        return;
     }
+
+    let finalCategory = category;
+
+    if (newCategory) {
+        try {
+            const response = await axios.post('http://localhost:8080/categories', { category: newCategory });
+            if (response.data.inserted) {
+                finalCategory = newCategory; // Use the new category if successfully added
+            } else {
+                setError('Category already exists');
+                return;
+            }
+        } catch (error) {
+            console.error('Failed to add new category:', error);
+            setError('Failed to add new category');
+            return;
+        }
+    }
+
     const payload = {
-      partNumber,
-      location,
-      serialNumbers: serialNumbers.filter(serial => serial !== ''),
-      item_description: itemDescription,
-      category,
-      manufacturer,
-      item_condition: itemCondition,
+        partNumber,
+        location,
+        serialNumbers: serialNumbers.filter(serial => serial !== ''),
+        item_description: itemDescription,
+        category: finalCategory,
+        manufacturer,
+        item_condition: itemCondition,
     };
 
-    console.log(payload);
-
     try {
-      setIsSubmitting(true);
-      const response = await axios.post('http://localhost:8080/parts', payload);
-      setIsSubmitting(false);
-      if (response.data.inserted) {
-        alert('Product added successfully');
-        setPartNumber('');
-        setLocation('');
-        setSerialNumbers(['']);
-        setItemDescription('');
-        setCategory('');
-        setManufacturer('');
-        setItemCondition('');
-        inputRefs.current = [React.createRef()];
-      } else {
-        setError('Failed to add product');
-      }
+        setIsSubmitting(true);
+        const response = await axios.post('http://localhost:8080/parts', payload);
+        setIsSubmitting(false);
+        if (response.data.inserted) {
+            alert('Product added successfully');
+            // Reset form
+            setPartNumber('');
+            setLocation('');
+            setSerialNumbers(['']);
+            setItemDescription('');
+            setCategory('');
+            setManufacturer('');
+            setItemCondition('');
+            setNewCategory('');
+            inputRefs.current = [React.createRef()];
+        } else {
+            setError('Failed to add product');
+        }
     } catch (error) {
-      console.error('There was an error adding the product:', error);
-      setError('Failed to add product');
-      setIsSubmitting(false);
+        console.error('There was an error adding the product:', error);
+        setError('Failed to add product');
+        setIsSubmitting(false);
     }
-  };
+};
+
 
   return (
     <div className="container mt-5">
@@ -126,11 +148,17 @@ function AddProduct() {
 
         <Form.Group controlId="category" className="mt-3">
           <Form.Label>Category</Form.Label>
+          <CategoryDropdown
+            selectedCategory={category}
+            onChange={(e) => setCategory(e.target.value)}
+            disabled={newCategory !== ''}
+          />
           <Form.Control
             type="text"
-            placeholder="Enter category"
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
+            placeholder="Add new category (optional)"
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            className="mt-2"
           />
         </Form.Group>
 
