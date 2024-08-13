@@ -1,35 +1,41 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import CategoryDropdown from '../components/CategoryDropdown'; // Adjust the import path as necessary
-import '../styles/Search.css'; // Import the CSS file for styles
-import axios from 'axios'; // Import axios for API calls
+import CategoryDropdown from '../components/CategoryDropdown';
+import ManufacturerDropdown from '../components/ManufacturerDropdown'; // Import the new component
+import '../styles/Search.css';
+import axios from 'axios';
 import BannerImage from "../assets/homeBack.png";
 
 function Search() {
     const [input, setInput] = useState("");
     const [searchType, setSearchType] = useState("part_number");
-    const [categories, setCategories] = useState([]); // State to hold categories
+    const [categories, setCategories] = useState([]);
+    const [manufacturers, setManufacturers] = useState([]); // State to hold manufacturers
     const navigate = useNavigate();
-    const [isEditing, setIsEditing] = useState(false); // State for edit mode
+    const [isEditing, setIsEditing] = useState(false);
 
     useEffect(() => {
         const savedSearchType = sessionStorage.getItem("searchType");
         if (savedSearchType) {
             setSearchType(savedSearchType);
         }
-        
-        // Fetch categories on component mount
-        const fetchCategories = async () => {
+
+        // Fetch categories and manufacturers on component mount
+        const fetchData = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/categories'); // Adjust the URL as needed
-                setCategories(response.data);
+                const [categoriesResponse, manufacturersResponse] = await Promise.all([
+                    axios.get('http://localhost:8080/categories'),
+                    axios.get('http://localhost:8080/manufacturers')
+                ]);
+                setCategories(categoriesResponse.data);
+                setManufacturers(manufacturersResponse.data);
             } catch (error) {
-                console.error('Failed to fetch categories:', error);
+                console.error('Failed to fetch data:', error);
             }
         };
-        
-        fetchCategories();
+
+        fetchData();
     }, []);
 
     const handleSearchTypeChange = (e) => {
@@ -44,7 +50,7 @@ function Search() {
 
     const handleSubmit = (event) => {
         event.preventDefault();
-        
+
         const sanitizedInput = sanitizeInput(input.trim());
         if (!sanitizedInput) {
             return;
@@ -70,29 +76,35 @@ function Search() {
         }
     };
 
-    const handleDeleteCategory = async () => {
+    const handleDelete = async () => {
         if (!input) {
-            console.error('No category selected for deletion');
+            console.error(`No ${searchType} selected for deletion`);
             return;
         }
 
-        // Confirm deletion
-        const confirmed = window.confirm(`Are you sure you want to delete the category "${input}"?`);
+        const confirmed = window.confirm(`Are you sure you want to delete the ${searchType} "${input}"?`);
         if (!confirmed) {
-            return; // Stop execution if not confirmed
+            return;
         }
 
         try {
-            await axios.delete('http://localhost:8080/categories', {
-                data: { category: input }
+            const url = searchType === "category" ? 'http://localhost:8080/categories' : 'http://localhost:8080/manufacturers';
+            await axios.delete(url, {
+                data: { [searchType]: input }
             });
-            setCategories(categories.filter(cat => cat !== input));
-            setInput(""); // Clear the input after deletion
-            alert('Category deleted successfully');
-            setIsEditing(false); // Reset edit mode after deletion
+
+            if (searchType === "category") {
+                setCategories(categories.filter(cat => cat !== input));
+            } else {
+                setManufacturers(manufacturers.filter(manufacturer => manufacturer !== input));
+            }
+
+            setInput("");
+            alert(`${searchType.charAt(0).toUpperCase() + searchType.slice(1)} deleted successfully`);
+            setIsEditing(false);
         } catch (error) {
-            console.error('Failed to delete category:', error);
-            alert('Failed to delete category');
+            console.error(`Failed to delete ${searchType}:`, error);
+            alert(`Failed to delete ${searchType}`);
         }
     };
 
@@ -123,14 +135,15 @@ function Search() {
                             <CategoryDropdown 
                                 selectedCategory={input}
                                 onChange={(e) => setInput(e.target.value)}
-                                className="green-bg" // Add a class to style the dropdown
+                                categories={categories} 
+                                className="green-bg"
                             />
                             {!isEditing && (
                                 <button 
                                     type="button" 
                                     className='btn btn-primary ms-2 btn-lg'
                                     onClick={handleToggleEdit}
-                                    style={{ marginLeft: 'auto' }} // Push button to the right
+                                    style={{ marginLeft: 'auto' }}
                                 >
                                     Edit
                                 </button>
@@ -140,8 +153,8 @@ function Search() {
                                     <button 
                                         type="button" 
                                         className='btn btn-danger ms-2 btn-lg'
-                                        onClick={handleDeleteCategory}
-                                        style={{ marginLeft: 'auto' }} // Push button to the right
+                                        onClick={handleDelete}
+                                        style={{ marginLeft: 'auto' }}
                                     >
                                         Delete
                                     </button>
@@ -149,7 +162,46 @@ function Search() {
                                         type="button" 
                                         className='btn btn-secondary ms-2 btn-lg'
                                         onClick={handleToggleEdit}
-                                        style={{ marginLeft: 'auto' }} // Push button to the right
+                                        style={{ marginLeft: 'auto' }}
+                                    >
+                                        Cancel
+                                    </button>
+                                </>
+                            )}
+                        </>
+                    ) : searchType === "manufacturer" ? (
+                        <>
+                            <ManufacturerDropdown 
+                                selectedManufacturer={input}
+                                onChange={(e) => setInput(e.target.value)}
+                                manufacturers={manufacturers} 
+                                className="green-bg"
+                            />
+                            {!isEditing && (
+                                <button 
+                                    type="button" 
+                                    className='btn btn-primary ms-2 btn-lg'
+                                    onClick={handleToggleEdit}
+                                    style={{ marginLeft: 'auto' }}
+                                >
+                                    Edit
+                                </button>
+                            )}
+                            {isEditing && (
+                                <>
+                                    <button 
+                                        type="button" 
+                                        className='btn btn-danger ms-2 btn-lg'
+                                        onClick={handleDelete}
+                                        style={{ marginLeft: 'auto' }}
+                                    >
+                                        Delete
+                                    </button>
+                                    <button 
+                                        type="button" 
+                                        className='btn btn-secondary ms-2 btn-lg'
+                                        onClick={handleToggleEdit}
+                                        style={{ marginLeft: 'auto' }}
                                     >
                                         Cancel
                                     </button>

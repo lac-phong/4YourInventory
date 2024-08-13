@@ -1,7 +1,8 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Button, Table, Alert } from 'react-bootstrap';
 import axios from 'axios';
-import CategoryDropdown from '../components/CategoryDropdown'; // Import the CategoryDropdown component
+import CategoryDropdown from '../components/CategoryDropdown';
+import ManufacturerDropdown from '../components/ManufacturerDropdown'; // Import the ManufacturerDropdown component
 
 function AddProduct() {
   const [partNumber, setPartNumber] = useState('');
@@ -9,8 +10,9 @@ function AddProduct() {
   const [serialNumbers, setSerialNumbers] = useState(['']);
   const [itemDescription, setItemDescription] = useState('');
   const [category, setCategory] = useState('');
-  const [newCategory, setNewCategory] = useState(''); // State to handle new category input
+  const [newCategory, setNewCategory] = useState('');
   const [manufacturer, setManufacturer] = useState('');
+  const [newManufacturer, setNewManufacturer] = useState(''); // State to handle new manufacturer input
   const [itemCondition, setItemCondition] = useState('');
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -41,7 +43,7 @@ function AddProduct() {
   const handleKeyDown = (e, index) => {
     if (e.key === 'Backspace' && !e.target.value) {
       e.preventDefault();
-      if (serialNumbers.length > 1) { // Ensure that there's more than one serial number input
+      if (serialNumbers.length > 1) {
         handleRemoveSerialNumber(index);
       }
     }
@@ -57,12 +59,13 @@ function AddProduct() {
     }
 
     let finalCategory = category;
+    let finalManufacturer = manufacturer;
 
     if (newCategory) {
         try {
             const response = await axios.post('http://localhost:8080/categories', { category: newCategory });
             if (response.data.inserted) {
-                finalCategory = newCategory; // Use the new category if successfully added
+                finalCategory = newCategory;
             } else {
                 setError('Category already exists');
                 return;
@@ -74,13 +77,29 @@ function AddProduct() {
         }
     }
 
+    if (newManufacturer) {
+        try {
+            const response = await axios.post('http://localhost:8080/manufacturers', { manufacturer: newManufacturer });
+            if (response.data.inserted) {
+                finalManufacturer = newManufacturer;
+            } else {
+                setError('Manufacturer already exists');
+                return;
+            }
+        } catch (error) {
+            console.error('Failed to add new manufacturer:', error);
+            setError('Failed to add new manufacturer');
+            return;
+        }
+    }
+
     const payload = {
         partNumber,
         location,
         serialNumbers: serialNumbers.filter(serial => serial !== ''),
         item_description: itemDescription,
         category: finalCategory,
-        manufacturer,
+        manufacturer: finalManufacturer,
         item_condition: itemCondition,
     };
 
@@ -99,6 +118,7 @@ function AddProduct() {
             setManufacturer('');
             setItemCondition('');
             setNewCategory('');
+            setNewManufacturer('');
             inputRefs.current = [React.createRef()];
         } else {
             setError('Failed to add product');
@@ -108,8 +128,7 @@ function AddProduct() {
         setError('Failed to add product');
         setIsSubmitting(false);
     }
-};
-
+  };
 
   return (
     <div className="container mt-5">
@@ -123,6 +142,7 @@ function AddProduct() {
             placeholder="Enter part number"
             value={partNumber}
             onChange={(e) => setPartNumber(e.target.value)}
+            className="thicker-form-control"
           />
         </Form.Group>
 
@@ -133,6 +153,7 @@ function AddProduct() {
             placeholder="Enter location"
             value={location}
             onChange={(e) => setLocation(e.target.value)}
+            className="thicker-form-control"
           />
         </Form.Group>
 
@@ -143,6 +164,7 @@ function AddProduct() {
             placeholder="Enter item description"
             value={itemDescription}
             onChange={(e) => setItemDescription(e.target.value)}
+            className="thicker-form-control"
           />
         </Form.Group>
 
@@ -152,23 +174,31 @@ function AddProduct() {
             selectedCategory={category}
             onChange={(e) => setCategory(e.target.value)}
             disabled={newCategory !== ''}
+            className="thicker-form-control"
           />
           <Form.Control
             type="text"
             placeholder="Add new category (optional)"
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
-            className="mt-2"
+            className="mt-2 thicker-form-control"
           />
         </Form.Group>
 
         <Form.Group controlId="manufacturer" className="mt-3">
           <Form.Label>Manufacturer</Form.Label>
+          <ManufacturerDropdown
+            selectedManufacturer={manufacturer}
+            onChange={(e) => setManufacturer(e.target.value)}
+            disabled={newManufacturer !== ''}
+            className="thicker-form-control"
+          />
           <Form.Control
             type="text"
-            placeholder="Enter manufacturer"
-            value={manufacturer}
-            onChange={(e) => setManufacturer(e.target.value)}
+            placeholder="Add new manufacturer (optional)"
+            value={newManufacturer}
+            onChange={(e) => setNewManufacturer(e.target.value)}
+            className="mt-2 thicker-form-control"
           />
         </Form.Group>
 
@@ -179,6 +209,7 @@ function AddProduct() {
             placeholder="Enter item condition"
             value={itemCondition}
             onChange={(e) => setItemCondition(e.target.value)}
+            className="thicker-form-control"
           />
         </Form.Group>
 
@@ -200,6 +231,7 @@ function AddProduct() {
                     onChange={(e) => handleAddSerialNumber(e, index)}
                     onKeyDown={(e) => handleKeyDown(e, index)}
                     placeholder={`Scan serial number ${index + 1}`}
+                    className="thicker-form-control"
                   />
                 </td>
               </tr>

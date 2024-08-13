@@ -16,7 +16,10 @@ import {
     getPartsByCategory,
     getAllCategories,
     insertCategory,
-    deleteCategory
+    deleteCategory,
+    getAllManufacturers,
+    insertManufacturer,
+    deleteManufacturer
 } from './database.js';
 
 dotenv.config();
@@ -294,7 +297,61 @@ app.delete("/categories", async (req, res) => {
     }
 });
 
-  
+// --------------------------------- MANUFACTURERS ---------------------------------------//
+
+
+// EXTERNAL: Get all unique manufac
+app.get("/manufacturers", async (req, res) => {
+    try {
+        const manufacturers = await getAllManufacturers();
+        res.json(manufacturers);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
+// EXTERNAL: insert a new manufac
+app.post("/manufacturers", async (req, res) => {
+    try {
+        const { manufacturer } = req.body;
+
+        if (!manufacturer) {
+            return res.status(400).json({ error: 'Manufacturer is required' });
+        }
+
+        const newManufacturer = await insertManufacturer(manufacturer);
+        if (!newManufacturer.inserted) {
+            return res.status(409).json({ error: 'Manufacturer already exists' });
+        }
+
+        res.json(newManufacturer);
+    } catch (error) {
+        console.error('Error inserting manufacturer:', error);
+        res.status(500).json({ error: 'Failed to add manufacturer' });
+    }
+});
+
+// EXTERNAL: delete a manufac
+app.delete("/manufacturers", async (req, res) => {
+    const { manufacturer } = req.body;
+
+    if (!manufacturer) {
+        return res.status(400).json({ error: 'Manufacturer is required' });
+    }
+
+    try {
+        const result = await deleteManufacturer(manufacturer);
+        if (result.deleted) {
+            res.json({ deleted: true });
+        } else {
+            res.status(404).json({ error: 'Manufacturer not found' });
+        }
+    } catch (error) {
+        console.error('Failed to delete manufacturer:', error);
+        res.status(500).json({ error: 'Failed to delete manufacturer' });
+    }
+});
+
 
 // Start the server
 const port = process.env.PORT || 8080;

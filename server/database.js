@@ -314,6 +314,78 @@ export async function deleteCategory(category) {
 }
 
 
+// ---------------- MANUFACTURERS ------------------- //
+
+// Function to get all unique manufacturers
+export async function getAllManufacturers() {
+    const sql = `SELECT manufacturer FROM movedbtwo.unique_manufacturers ORDER BY manufacturer;`;
+    try {
+        const [rows] = await pool.query(sql);
+        return rows.map(row => row.manufacturer);
+    } catch (error) {
+        throw new Error('Failed to retrieve manufacturers: ' + error.message);
+    }
+}
+
+// Function to add a new manufacturer to the database
+export async function insertManufacturer(manufacturer) {
+    const sqlInsertManu = `
+        INSERT INTO unique_manufacturers (manufacturer)
+        VALUES (?);
+    `;
+    const sqlSelectManu = 'SELECT manufacturer FROM unique_manufacturers WHERE manufacturer = ?';
+    let connection;
+    try {
+        connection = await pool.getConnection(); // Use the connection pool
+
+        // Check if already exists
+        const [existingManu] = await connection.query(sqlSelectManu, [manufacturer]);
+
+        if (existingManu.length > 0) {
+            return { inserted: false }; //  already exists
+        }
+
+        // Insert the new 
+        const [result] = await connection.query(sqlInsertManu, [manufacturer]);
+
+        if (!result.affectedRows) {
+            console.error('Manufacturer Insert failed, no rows affected');
+            throw new Error('Manufacturer Insert failed, no rows affected');
+        }
+
+        return { inserted: true };
+    } catch (error) {
+        console.error('Failed to insert manufacturer:', error);
+        throw new Error('Failed to insert manufacturer: ' + error.message);
+    } finally {
+        if (connection) connection.release(); 
+    }
+}
+
+// Function to delete a manufacturer from the database
+export async function deleteManufacturer(manufacturer) {
+    const sqlDeleteManu = 'DELETE FROM unique_manufacturers WHERE manufacturer = ?';
+    let connection;
+
+    try {
+        connection = await pool.getConnection(); // Use the connection pool
+
+        // Delete 
+        const [result] = await connection.query(sqlDeleteManu, [manufacturer]);
+        if (result.affectedRows === 0) {
+            console.error('Manufacturer Delete failed, no rows affected');
+            return { deleted: false };
+        }
+
+        return { deleted: true };
+    } catch (error) {
+        console.error('Failed to delete manufacturer:', error);
+        throw new Error('Failed to delete manufacturer: ' + error.message);
+    } finally {
+        if (connection) connection.release(); 
+    }
+}
+
 
 // INTERNAL FUNCTION
 async function checkPartExists(partNumber) {
