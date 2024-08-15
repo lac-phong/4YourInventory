@@ -20,6 +20,7 @@ function Inventory() {
         category: '',
         manufacturer: '',
     });
+    const [ebayListings, setEbayListings] = useState({ items: [] });
 
     useEffect(() => {
         if (partNumber) {
@@ -31,9 +32,10 @@ function Inventory() {
         try {
             setLoading(true);
             const response = await axios.get(`http://localhost:8080/parts/${partNumber}`);
-            const quantity = await axios.get(`http://localhost:8080/item/${partNumber}`);
+            const ebayResponse = await axios.get(`http://localhost:8080/item/${partNumber}`);
+            setEbayListings(ebayResponse);
 
-            if (response.data.quantity_on_ebay === quantity.data.totalQuantity) {
+            if (response.data.quantity_on_ebay === ebayResponse.data.totalQuantity) {
                 const updatedFormData = {
                     part_number: response.data.part_number,
                     quantity: response.data.quantity,
@@ -50,7 +52,7 @@ function Inventory() {
                 const updatedFormData = {
                     part_number: response.data.part_number,
                     quantity: response.data.quantity,
-                    quantity_on_ebay: quantity.data.totalQuantity,
+                    quantity_on_ebay: ebayResponse.data.totalQuantity,
                     quantity_sold: response.data.quantity_sold,
                     item_description: response.data.item_description,
                     category: response.data.category,
@@ -243,6 +245,33 @@ function Inventory() {
                             </tbody>
                         </table>
                     </form>
+                    <div className='mt-4'>
+                        <h3>eBay Listings</h3>
+                        <table className='table table-striped'>
+                            <thead className='thead-dark'>
+                                <tr>
+                                    <th>Title</th>
+                                    <th>Price</th>
+                                    <th>Condition</th>
+                                    <th>Quantity</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            {ebayListings.data.items.map((item, index) => {
+                                console.log(item); // Check the structure of each item
+                                return (
+                                    <tr key={index}>
+                                        <td>{item.title}</td>
+                                        <td>${item.price.value}</td>
+                                        <td>{item.condition}</td>
+                                        <td>{item.quantity}</td>
+                                    </tr>
+                                );
+                            })}
+                            </tbody>
+                        </table>
+                    </div>
+
                     <div className='mb-4'>
                         <label htmlFor='filter'>Filter by Sold Status: </label>
                         <select id='filter' className='form-control' value={filter} onChange={handleFilterChange}>

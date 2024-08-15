@@ -1,3 +1,57 @@
 .hottest{
     padding-bottom: 30px !important;
 }
+
+.table-wrapper {
+    position: relative;
+    max-height: 400px; /* Adjust as needed */
+    overflow-y: auto;
+}
+
+.table-header {
+    position: sticky;
+    top: 0;
+    background-color: #fff; /* Match the background of the table body */
+    z-index: 2; /* Ensure headers are on top */
+}
+
+.table-body {
+    display: block;
+}
+
+.header-table, .body-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.header-table th, .body-table td {
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.header-table th {
+    position: sticky;
+    top: 0;
+    background-color: #fff; /* Match the background of the table body */
+    z-index: 2; /* Ensure headers are on top */
+}
+
+.col-part-number { width: 15%; }
+.col-quantity { width: 10%; }
+.col-quantity-ebay { width: 15%; }
+.col-quantity-sold { width: 15%; }
+.col-description { width: 25%; }
+.col-category { width: 10%; }
+.col-manufacturer { width: 10%; }
+
+/* Optional: Add additional styles to improve appearance */
+.header-table th {
+    background-color: #f8f9fa;
+    border-bottom: 2px solid #dee2e6;
+}
+
+.body-table td {
+    border-bottom: 1px solid #dee2e6;
+}
+
+  
