@@ -19,7 +19,8 @@ import {
     deleteCategory,
     getAllManufacturers,
     insertManufacturer,
-    deleteManufacturer
+    deleteManufacturer,
+    getAllParts
 } from './database.js';
 
 dotenv.config();
@@ -58,6 +59,16 @@ async function getEbayAuthToken() {
 // ------------------------------------------------------------------------------------------------------------------------------------------------//
 
 // ------------------------------------------------------------- PARTS ---------------------------------------------------------------------------//
+
+app.get("/allparts", async (req, res) => {
+    try {
+        const parts = await getAllParts();
+        res.json(parts);
+    } catch (error) {
+        res.status(500).json({ error: error.message });
+    }
+});
+
 
 app.get("/parts/:part_number", async (req, res) => {
     const { part_number } = req.params;
@@ -218,6 +229,9 @@ app.get('/item/:part_number', async (req, res) => {
                 const itemJson = await itemDetails.json();
                 return {
                     itemId: itemId,
+                    title: itemJson.title,
+                    price: itemJson.price,
+                    condition: itemJson.condition,
                     quantity: itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity
                 };
             } catch (error) {

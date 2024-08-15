@@ -57,3 +57,7 @@ form .btn {
   height: 40px; /* Ensure buttons are the same height */
   font-size: 16px; /* Smaller font size for buttons */
 }
+
+.mt-4{
+  padding-bottom: 40px;
+}

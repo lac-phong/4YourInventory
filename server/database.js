@@ -18,6 +18,17 @@ const pool = mysql.createPool({
 
 // ------------------------------------------------------------- PART NUMBERS -------------------------------------------------------------------------//
 
+export async function getAllParts() {
+    const sql = `SELECT * FROM movedbtwo.parts;`;
+    try {
+        const [rows] = await pool.query(sql);
+        return rows; // Directly return rows; no need to map here
+    } catch (error) {
+        throw new Error('Failed to retrieve parts: ' + error.message);
+    }
+}
+
+
 export async function getItemByPartNumberWithSerials(part_number) {
     const sql = `
         SELECT p.*, s.id AS serial_id, s.serial_number, s.sold, s.locations, s.item_condition
