@@ -4,7 +4,7 @@
 
 .table-wrapper {
     position: relative;
-    max-height: 400px; /* Adjust as needed */
+    max-height: 600px; /* Adjust as needed */
     overflow-y: auto;
 }
 
