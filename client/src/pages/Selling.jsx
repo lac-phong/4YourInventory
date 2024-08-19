@@ -66,7 +66,7 @@ function Selling() {
 
   return (
     <Container className="mt-5">
-      <h2>Selling Page</h2>
+      <h2 style={{ marginTop: '4.5rem' }}>Selling Page</h2>
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="partNumber">
           <Form.Label>Part Number</Form.Label>

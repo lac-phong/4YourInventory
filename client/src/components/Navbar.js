@@ -1,55 +1,68 @@
-import React, { useState } from "react";
-import Logo from "../assets/logo4yb.png";
+import React, { useState } from 'react';
 import { Link, useNavigate } from "react-router-dom";
-import ReorderIcon from '@mui/icons-material/Reorder';
-import "../styles/Navbar.css";
-import { Alert } from "react-bootstrap";
+import { Navbar, Nav, Container, Button, Alert } from 'react-bootstrap';
 import { useAuth } from "../contexts/AuthContext";
+import Logo from "../assets/logo4yb.png";
+import ReorderIcon from '@mui/icons-material/Reorder';
+import '../styles/Navbar.css';
 
-export default function Navbar() {
-  const [openLinks, setOpenLinks] = useState(false);
+export default function NavBar() {
+  const [expanded, setExpanded] = useState(false);
+  const [error, setError] = useState("");
+  const { currentUser, logout } = useAuth();
+  const navigate = useNavigate();
 
-  const [error, setError] = useState("")
-  const { currentUser, logout } = useAuth()
-  const navigate = useNavigate()
-
-
-  async function handleLogout(){
-    setError('')
-    try{
-      await logout()
-      navigate("/")
-    } catch{
-      setError('Failed to logout')
+  async function handleLogout() {
+    setError("");
+    try {
+      await logout();
+      navigate("/");
+    } catch {
+      setError("Failed to logout. Please try again.");
     }
   }
 
-  const toggleNavbar = () => {
-    setOpenLinks(!openLinks);
-  };
   return (
-    <div className="navbar">
-      <div className="leftSide" id={openLinks ? "open" : "close"}>
-        <img src={Logo} />
-        <div className="hiddenLinks">
-          <Link to="/home"> Home </Link>
-          <Link to="/search"> Search </Link>
-          <Link to="/addproduct"> Add Product </Link>
-          <Link to="/selling"> Selling </Link>
-          <Link to="/" className="logout-link" onClick={handleLogout}> Logout </Link>
-        </div>
-      </div>
-      <div className="rightSide">
-        <Link to="/home"> Home </Link>
-        <Link to="/search"> Search </Link>
-        <Link to="/addproduct"> Add Product </Link>
-        <Link to="/selling"> Selling </Link>
-        <Link to="/" className="logout-link" onClick={handleLogout}> Logout </Link>
-        <button onClick={toggleNavbar}>
-          <ReorderIcon />
-        </button>
-      </div>
-    </div>
+    <>
+      {error && (
+        <Alert variant="danger" onClose={() => setError("")} dismissible>
+          {error}
+        </Alert>
+      )}
+
+      <Navbar variant="dark" expand="lg" fixed="top" expanded={expanded}>
+        <Container>
+          <Navbar.Brand as={Link} to="/home">
+            <img src={Logo} alt="Logo" style={{ width: '70px' }} />
+          </Navbar.Brand>
+          <Navbar.Toggle 
+            aria-controls="basic-navbar-nav" 
+            onClick={() => setExpanded(!expanded)}
+          >
+            <ReorderIcon style={{ color: 'white' }} />
+          </Navbar.Toggle>
+          <Navbar.Collapse id="basic-navbar-nav">
+            <Nav className="ms-auto text-center">
+              <Nav.Link as={Link} to="/home" onClick={() => setExpanded(false)}>Home</Nav.Link>
+              <Nav.Link as={Link} to="/search" onClick={() => setExpanded(false)}>Search</Nav.Link>
+              <Nav.Link as={Link} to="/addproduct" onClick={() => setExpanded(false)}>Add Product</Nav.Link>
+              <Nav.Link as={Link} to="/selling" onClick={() => setExpanded(false)}>Selling</Nav.Link>
+              {currentUser && (
+                <Button 
+                  variant="link" 
+                  onClick={() => {
+                    handleLogout();
+                    setExpanded(false);
+                  }} 
+                  className="nav-link btn-link"
+                >
+                  Logout
+                </Button>
+              )}
+            </Nav>
+          </Navbar.Collapse>
+        </Container>
+      </Navbar>
+    </>
   );
 }
-

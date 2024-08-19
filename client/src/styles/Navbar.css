@@ -1,112 +1,57 @@
+/* Ensure the navbar background color is black */
 .navbar {
-    width: 100%;
-    height: 80px;
-    background-color: #121619;
-    display: flex;
-    flex-direction: row;
-  }
-  
-  .navbar .leftSide {
-    flex: 50%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    padding-left: 150px;
-  }
-  
-  .navbar .leftSide img {
-    width: 70px;
-  }
-  
-  .navbar .rightSide {
-    flex: 50%;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .navbar a {
-    color: white;
-    text-decoration: none;
-    margin: 20px;
-  }
-  
-  .navbar .rightSide button {
-    background-color: transparent;
-    border: none;
-    color: white;
-    cursor: pointer;
-  }
-  
-  .navbar .rightSide svg {
-    font-size: 40px;
-  }
-  
-  .navbar #open {
-    padding-left: 0px;
-  }
-  .navbar #open img {
-    display: none;
-  }
-  
-  .navbar #close img {
-    display: inherit;
-  }
-  
-  .navbar #open .hiddenLinks {
-    display: inherit;
-    margin-left: 30px;
-  }
-  
-  .navbar #close .hiddenLinks {
-    display: none;
-  }
-  
-  .navbar #open a {
-    width: 70px;
-    margin: 5px;
-  }
+  background-color: #131313 !important; /* Force black background color */
+}
 
-  a:hover {
-    color: #7FFB8F;
-  }
+/* Align all navbar links to the right when expanded */
+.navbar-nav {
+  margin-left: auto;
+}
 
-  .navbar .rightSide .logout-link,
-  .navbar .leftSide .logout-link {
-    color: rgb(103, 201, 246) !important; 
-  }
+/* Increase spacing between navbar items */
+.navbar-nav .nav-link {
+  color: white !important;
+  padding: 0.5rem 1rem !important; /* Increase horizontal padding */
+  margin: 0 0.25rem; /* Add horizontal margin */
+}
 
-  @media only screen and (max-width: 900px) {
-    .navbar .rightSide a {
-      width: 70px;
-    }
-    .navbar .leftSide {
-      padding-left: 50px;
-    }
+.navbar-nav .nav-link:hover {
+  color: #7FFB8F !important; /* Change to desired hover color */
+}
+
+/* Center align navbar links when collapsed */
+@media (max-width: 991.98px) {
+  .navbar-nav {
+    text-align: center;
   }
   
-  @media only screen and (max-width: 600px) {
-    .navbar .rightSide a {
-      display: none;
-    }
-  
-    .navbar .rightSide {
-      justify-content: flex-end;
-      padding-right: 50px;
-    }
-  
-    .navbar .rightSide button {
-      display: inherit;
-    }
+  .navbar-nav .nav-link {
+    padding: 0.75rem 1rem !important; /* Increase vertical padding for mobile */
   }
-  
-  @media only screen and (min-width: 600px) {
-    .navbar .rightSide button {
-      display: none;
-    }
-  
-    .hiddenLinks {
-      display: none;
-    }
+}
+
+/* Ensure the toggle button is visible on smaller screens */
+.navbar-toggler {
+  border-color: white;
+}
+
+.navbar-toggler-icon {
+  background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(255, 255, 255, 0.85)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+}
+
+/* Add some padding to the collapsed navbar */
+@media (max-width: 991.98px) {
+  .navbar-collapse {
+    padding-top: 1rem;
+    padding-bottom: 1rem;
   }
+}
+
+.navbar-nav .nav-link.btn-link {
+  color: #7bebad !important; /* Blue color for logout */
+}
+
+.navbar-nav .nav-link.btn-link:hover {
+  color: #026525 !important; /* Darker blue on hover */
+  text-decoration: underline;
+}
