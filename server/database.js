@@ -19,7 +19,7 @@ const pool = mysql.createPool({
 // ------------------------------------------------------------- PART NUMBERS -------------------------------------------------------------------------//
 
 export async function getAllParts() {
-    const sql = `SELECT * FROM movedbtwo.parts;`;
+    const sql = `SELECT * FROM fouyourb_4yourinventory.parts;`;
     try {
         const [rows] = await pool.query(sql);
         return rows; // Directly return rows; no need to map here
@@ -32,8 +32,8 @@ export async function getAllParts() {
 export async function getItemByPartNumberWithSerials(part_number) {
     const sql = `
         SELECT p.*, s.id AS serial_id, s.serial_number, s.sold, s.locations, s.item_condition
-        FROM movedbtwo.parts p
-        LEFT JOIN movedbtwo.serials s ON p.part_number = s.part_number
+        FROM fouyourb_4yourinventory.parts p
+        LEFT JOIN fouyourb_4yourinventory.serials s ON p.part_number = s.part_number
         WHERE p.part_number = ?;
     `;
     try {
@@ -66,7 +66,7 @@ export async function getItemByPartNumberWithSerials(part_number) {
 
 export async function getItemBySerialNumber(serial_number) {
     const sql = `
-        SELECT serial_number, part_number, CAST(sold AS UNSIGNED) AS sold, locations, item_condition FROM movedbtwo.serials
+        SELECT serial_number, part_number, CAST(sold AS UNSIGNED) AS sold, locations, item_condition FROM fouyourb_4yourinventory.serials
         WHERE serial_number = ?;
     `;
     try {
@@ -128,7 +128,7 @@ export async function updatePart(part_number, updates) {
     const { quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer } = updates;
 
     const sql = `
-        UPDATE movedbtwo.parts
+        UPDATE fouyourb_4yourinventory.parts
         SET quantity = ?, quantity_on_ebay = ?, quantity_sold = ?, item_description = ?, category = ?, manufacturer = ?
         WHERE part_number = ?;
     `;
@@ -152,7 +152,7 @@ export async function updateSerial(serial_number, updates) {
     const { part_number, sold, locations, item_condition } = updates;
 
     const sql = `
-        UPDATE movedbtwo.serials
+        UPDATE fouyourb_4yourinventory.serials
         SET part_number = ?, sold = ?, locations = ?, item_condition = ?
         WHERE serial_number = ?;
     `;
@@ -187,7 +187,7 @@ export async function markSerialNumbersAsSold(partNumber, serialNumbers) {
 
         // Step 1: Mark the serial numbers as sold
         const sqlUpdateSerials = `
-          UPDATE movedbtwo.serials
+          UPDATE fouyourb_4yourinventory.serials
           SET sold = 1
           WHERE part_number = ? AND serial_number IN (${placeholders});
         `;
@@ -201,7 +201,7 @@ export async function markSerialNumbersAsSold(partNumber, serialNumbers) {
         // Calculate the number of serial numbers sold
         const quantitySold = serialNumbers.length;
         const sqlUpdateParts = `
-          UPDATE movedbtwo.parts
+          UPDATE fouyourb_4yourinventory.parts
           SET quantity = quantity - ?,
               quantity_sold = quantity_sold + ?
           WHERE part_number = ?;
@@ -228,7 +228,7 @@ export async function markSerialNumbersAsSold(partNumber, serialNumbers) {
 export async function getPartsByManufacturer(manufacturer) {
     const sql = `
         SELECT part_number, quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer
-        FROM movedbtwo.parts
+        FROM fouyourb_4yourinventory.parts
         WHERE TRIM(LOWER(manufacturer)) = TRIM(LOWER(?));
     `;
     try {
@@ -243,7 +243,7 @@ export async function getPartsByManufacturer(manufacturer) {
 export async function getPartsByCategory(category) {
     const sql = `
         SELECT part_number, quantity, quantity_on_ebay, quantity_sold, item_description, category, manufacturer
-        FROM movedbtwo.parts
+        FROM fouyourb_4yourinventory.parts
         WHERE TRIM(LOWER(category)) = TRIM(LOWER(?));
     `;
     try {
@@ -256,7 +256,7 @@ export async function getPartsByCategory(category) {
 
 // Function to get all unique categories
 export async function getAllCategories() {
-    const sql = `SELECT category FROM movedbtwo.unique_categories ORDER BY category;`;
+    const sql = `SELECT category FROM fouyourb_4yourinventory.unique_categories ORDER BY category;`;
     try {
         const [rows] = await pool.query(sql);
         return rows.map(row => row.category);
@@ -329,7 +329,7 @@ export async function deleteCategory(category) {
 
 // Function to get all unique manufacturers
 export async function getAllManufacturers() {
-    const sql = `SELECT manufacturer FROM movedbtwo.unique_manufacturers ORDER BY manufacturer;`;
+    const sql = `SELECT manufacturer FROM fouyourb_4yourinventory.unique_manufacturers ORDER BY manufacturer;`;
     try {
         const [rows] = await pool.query(sql);
         return rows.map(row => row.manufacturer);
@@ -401,7 +401,7 @@ export async function deleteManufacturer(manufacturer) {
 // INTERNAL FUNCTION
 async function checkPartExists(partNumber) {
     const sql = `
-        SELECT 1 FROM movedbtwo.parts 
+        SELECT 1 FROM fouyourb_4yourinventory.parts 
         WHERE part_number = ?
     `;
     try {
