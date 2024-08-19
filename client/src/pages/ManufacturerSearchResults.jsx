@@ -9,34 +9,51 @@ function ManufacturerSearchResults() {
     const { manufacturer } = useParams();
     const [parts, setParts] = useState([]);
     const [categories, setCategories] = useState([]);
+    const [loading, setLoading] = useState(true);
     const [selectedCategory, setSelectedCategory] = useState('All');
 
     // Fetch parts by manufacturer
     useEffect(() => {
-        axios.get(`http://localhost:8080/parts/manufacturer/${manufacturer}`)
-            .then(response => {
-                setParts(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching parts:', error);
-            });
+        if (manufacturer) {
+            getItemByManufacturer(manufacturer);
+        }
     }, [manufacturer]);
 
-    // Fetch categories for the dropdown
-    useEffect(() => {
-        axios.get('http://localhost:8080/categories')
-            .then(response => {
-                setCategories(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching categories:', error);
-            });
-    }, []);
+    const getItemByManufacturer = async (manufacturer) => {
+        try {
+            setLoading(true);
+            const response = await window.electron.ipcRenderer.invoke('get-parts-by-manufacturer', manufacturer);
+            setParts(response);
+        } catch (error) {
+            console.error('Error fetching parts:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
 
     // Filter parts based on selected category
     const filteredParts = selectedCategory === 'All'
         ? parts
         : parts.filter(part => part.category === selectedCategory);
+
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: 'green'
+            }}>
+                <div className="spinner-border" role="status" style={{ marginRight: '10px' }}>
+                    <span className="sr-only">Loading...</span>
+                </div>
+                LOADING
+            </div>
+        );
+    }
 
     return (
         <div className='container mt-4'>

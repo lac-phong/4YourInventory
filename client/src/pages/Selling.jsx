@@ -49,8 +49,8 @@ function Selling() {
     };
 
     try {
-      const response = await axios.put('http://localhost:8080/serials', payload);
-      if (response.data.updated) {
+      const response = await window.electron.ipcRenderer.invoke('mark-serials-sold', payload);
+      if (response.updated) {
         alert('Serial numbers marked as sold successfully');
         setPartNumber('');
         setSerialNumbers(['']);

@@ -7,8 +7,8 @@ const CategoryDropdown = ({ selectedCategory, onChange, className }) => {
     useEffect(() => {
         const fetchCategories = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/categories');
-                setCategories(response.data);
+                const response = await window.electron.ipcRenderer.invoke('get-all-categories');
+                setCategories(response);
             } catch (error) {
                 console.error('Error fetching categories:', error);
             }

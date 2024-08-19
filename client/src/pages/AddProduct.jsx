@@ -63,8 +63,8 @@ function AddProduct() {
 
     if (newCategory) {
         try {
-            const response = await axios.post('http://localhost:8080/categories', { category: newCategory });
-            if (response.data.inserted) {
+            const response = await window.electron.ipcRenderer.invoke('insert-category', newCategory);
+            if (response.inserted) {
                 finalCategory = newCategory;
             } else {
                 setError('Category already exists');
@@ -79,8 +79,8 @@ function AddProduct() {
 
     if (newManufacturer) {
         try {
-            const response = await axios.post('http://localhost:8080/manufacturers', { manufacturer: newManufacturer });
-            if (response.data.inserted) {
+            const response = await window.electron.ipcRenderer.invoke('insert-manufacturer', newManufacturer);
+            if (response.inserted) {
                 finalManufacturer = newManufacturer;
             } else {
                 setError('Manufacturer already exists');
@@ -105,9 +105,9 @@ function AddProduct() {
 
     try {
         setIsSubmitting(true);
-        const response = await axios.post('http://localhost:8080/parts', payload);
+        const response = await window.electron.ipcRenderer.invoke('insert-part', payload);
         setIsSubmitting(false);
-        if (response.data.inserted) {
+        if (response.inserted) {
             alert('Product added successfully');
             // Reset form
             setPartNumber('');

@@ -7,8 +7,8 @@ const ManufacturerDropdown = ({ selectedManufacturer, onChange, className }) => 
     useEffect(() => {
         const fetchManufacturers = async () => {
             try {
-                const response = await axios.get('http://localhost:8080/manufacturers');
-                setManufacturers(response.data);
+                const response = await window.electron.ipcRenderer.invoke('get-all-manufacturers');
+                setManufacturers(response);
             } catch (error) {
                 console.error('Error fetching manufacturers:', error);
             }

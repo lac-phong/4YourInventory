@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import Search from '../components/Search';
 import '../styles/Inventory.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -31,39 +30,40 @@ function Inventory() {
     const getPartNumber = async (partNumber) => {
         try {
             setLoading(true);
-            const response = await axios.get(`http://localhost:8080/parts/${partNumber}`);
-            const ebayResponse = await axios.get(`http://localhost:8080/item/${partNumber}`);
-            setEbayListings(ebayResponse);
+            const response = await window.electron.ipcRenderer.invoke('get-part-by-number', partNumber);
+            const ebayResponse = await window.electron.ipcRenderer.invoke('get-ebay-item', partNumber);
 
-            if (response.data.quantity_on_ebay === ebayResponse.data.totalQuantity) {
+            setEbayListings(ebayResponse)
+
+            if (response.quantity_on_ebay === ebayResponse.totalQuantity) {
                 const updatedFormData = {
-                    part_number: response.data.part_number,
-                    quantity: response.data.quantity,
-                    quantity_on_ebay: response.data.quantity_on_ebay,
-                    quantity_sold: response.data.quantity_sold,
-                    item_description: response.data.item_description,
-                    category: response.data.category,
-                    manufacturer: response.data.manufacturer,
+                    part_number: response.part_number,
+                    quantity: response.quantity,
+                    quantity_on_ebay: response.quantity_on_ebay,
+                    quantity_sold: response.quantity_sold,
+                    item_description: response.item_description,
+                    category: response.category,
+                    manufacturer: response.manufacturer,
                 };
                 
                 setFormData(updatedFormData);
-                setPart(response.data);
+                setPart(response);
             } else {
                 const updatedFormData = {
-                    part_number: response.data.part_number,
-                    quantity: response.data.quantity,
-                    quantity_on_ebay: ebayResponse.data.totalQuantity,
-                    quantity_sold: response.data.quantity_sold,
-                    item_description: response.data.item_description,
-                    category: response.data.category,
-                    manufacturer: response.data.manufacturer,
+                    part_number: response.part_number,
+                    quantity: response.quantity,
+                    quantity_on_ebay: ebayResponse.totalQuantity,
+                    quantity_sold: response.quantity_sold,
+                    item_description: response.item_description,
+                    category: response.category,
+                    manufacturer: response.manufacturer,
                 };
                 
                 setFormData(updatedFormData);
                 // Update the part with the fetched form data
-                const updatedResponse = await axios.put(`http://localhost:8080/parts/${partNumber}`, updatedFormData);
+                const updatedResponse = await window.electron.ipcRenderer.invoke('update-part', partNumber, updatedFormData);
                 // Set the part state with the updated data
-                setPart(updatedResponse.data);
+                setPart(updatedResponse);
             }
           
         } catch (error) {
@@ -81,8 +81,8 @@ function Inventory() {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`http://localhost:8080/parts/${formData.part_number}`, formData);
-            setPart(response.data);
+            const response = await window.electron.ipcRenderer.invoke('update-part', formData.part_number, formData);
+            setPart(response);
             setEditMode(false);
         } catch (error) {
             console.error('Error updating part data:', error);
@@ -254,17 +254,29 @@ function Inventory() {
                                     <th>Price</th>
                                     <th>Condition</th>
                                     <th>Quantity</th>
+                                    <th>Link</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            {ebayListings.data.items.map((item, index) => {
+                            {ebayListings.items.map((item, index) => {
                                 console.log(item); // Check the structure of each item
                                 return (
                                     <tr key={index}>
                                         <td>{item.title}</td>
-                                        <td>${item.price.value}</td>
+                                        <td>{item.price.value}</td>
                                         <td>{item.condition}</td>
                                         <td>{item.quantity}</td>
+                                        <td>
+                                            <a
+                                                href="#"
+                                                onClick={(e) => {
+                                                e.preventDefault();
+                                                window.electron.shell.openExternal(item.itemWebUrl);
+                                                }}
+                                            >
+                                                View Listing
+                                            </a>
+                                        </td>
                                     </tr>
                                 );
                             })}

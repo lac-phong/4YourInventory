@@ -13,9 +13,8 @@ function Dash() {
   useEffect(() => {
     const fetchParts = async () => {
       try {
-        const response = await fetch('http://localhost:8080/allparts');
-        const data = await response.json();
-        setParts(data);
+        const response = await window.electron.ipcRenderer.invoke('get-all-parts');
+        setParts(response);
       } catch (error) {
         console.error('Failed to fetch parts:', error);
       }

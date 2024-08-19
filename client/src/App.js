@@ -1,7 +1,7 @@
 import './App.css';
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Search from "./pages/Home";
+import Search from "./pages/SearchPage";
 import Dashboard from "./pages/Dash";
 import AddProduct from "./pages/AddProduct";
 import Inventory from "./pages/Inventory";
@@ -12,7 +12,7 @@ import { BrowserRouter as Router, Route, Routes, useLocation } from "react-route
 import { AuthProvider } from './contexts/AuthContext';
 import Signup from './pages/Signup';
 import PrivateRoute from './components/PrivateRoutes';
-import ForgotPassword from './pages/forgotpassword';
+import ForgotPassword from './pages/ForgotPassword';
 import ManufacturerSearchResults from "./pages/ManufacturerSearchResults"; // Import the new component
 import CategorySearchResults from "./pages/CategorySearchResults"; // Import the new component
 

@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import CategoryDropdown from '../components/CategoryDropdown';
-import ManufacturerDropdown from '../components/ManufacturerDropdown'; // Import the new component
+import CategoryDropdown from './CategoryDropdown';
+import ManufacturerDropdown from './ManufacturerDropdown'; // Import the new component
 import '../styles/Search.css';
 import axios from 'axios';
 import BannerImage from "../assets/homeBack.png";
@@ -25,11 +25,11 @@ function Search() {
         const fetchData = async () => {
             try {
                 const [categoriesResponse, manufacturersResponse] = await Promise.all([
-                    axios.get('http://localhost:8080/categories'),
-                    axios.get('http://localhost:8080/manufacturers')
+                    window.electron.ipcRenderer.invoke('get-all-categories'),
+                    window.electron.ipcRenderer.invoke('get-all-manufacturers')
                 ]);
-                setCategories(categoriesResponse.data);
-                setManufacturers(manufacturersResponse.data);
+                setCategories(categoriesResponse);
+                setManufacturers(manufacturersResponse);
             } catch (error) {
                 console.error('Failed to fetch data:', error);
             }
@@ -88,14 +88,11 @@ function Search() {
         }
 
         try {
-            const url = searchType === "category" ? 'http://localhost:8080/categories' : 'http://localhost:8080/manufacturers';
-            await axios.delete(url, {
-                data: { [searchType]: input }
-            });
-
             if (searchType === "category") {
+                await window.electron.ipcRenderer.invoke('delete-category', input);
                 setCategories(categories.filter(cat => cat !== input));
             } else {
+                await window.electron.ipcRenderer.invoke('delete-manufacturer', input);
                 setManufacturers(manufacturers.filter(manufacturer => manufacturer !== input));
             }
 
