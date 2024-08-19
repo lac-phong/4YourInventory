@@ -33,9 +33,9 @@ export default function Signup() {
       setError('');
       setLoading(true);
       await signup(emailRef.current.value, passwordRef.current.value);
-      navigate("/");
-    } catch {
-      setError('Failed to create an account');
+      navigate("/verify-email"); // Navigate to the verification page
+    } catch (error) {
+      setError(error.message || 'Failed to create an account');
     }
 
     setLoading(false);
@@ -61,8 +61,8 @@ export default function Signup() {
               <div className="w-100 text-center mt-2">
                 Already have an account? <a href="/">Click Here</a>
                 <p className="small mb-5 pb-lg-3 ms-5">
-              <a className="text-muted" href="/forgotpassword">Forgot password?</a>
-            </p>
+                  <a className="text-muted" href="/forgotpassword">Forgot password?</a>
+                </p>
               </div>
             </MDBCardBody>
           </MDBCard>
