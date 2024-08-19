@@ -63,6 +63,7 @@ export default function NavBar() {
           </Navbar.Collapse>
         </Container>
       </Navbar>
+      <div style={{ height: '50px' }}></div>
     </>
   );
 }
