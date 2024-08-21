@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Search from '../components/Search';
 import '../styles/Inventory.css';
@@ -29,49 +29,52 @@ function Inventory() {
     }, [partNumber]);
 
     const getPartNumber = async (partNumber) => {
-        try {
-            setLoading(true);
-            const response = await axios.get(`http://localhost:8080/parts/${partNumber}`);
-            const ebayResponse = await axios.get(`http://localhost:8080/item/${partNumber}`);
-            setEbayListings(ebayResponse);
+    try {
+        setLoading(true);
+        // Encode the part number to handle special characters
+        const encodedPartNumber = encodeURIComponent(partNumber);
+        
+        const response = await axios.get(`http://localhost:8080/parts/${encodedPartNumber}`);
+        const ebayResponse = await axios.get(`http://localhost:8080/item/${encodedPartNumber}`);
+        setEbayListings(ebayResponse);
 
-            if (response.data.quantity_on_ebay === ebayResponse.data.totalQuantity) {
-                const updatedFormData = {
-                    part_number: response.data.part_number,
-                    quantity: response.data.quantity,
-                    quantity_on_ebay: response.data.quantity_on_ebay,
-                    quantity_sold: response.data.quantity_sold,
-                    item_description: response.data.item_description,
-                    category: response.data.category,
-                    manufacturer: response.data.manufacturer,
-                };
-                
-                setFormData(updatedFormData);
-                setPart(response.data);
-            } else {
-                const updatedFormData = {
-                    part_number: response.data.part_number,
-                    quantity: response.data.quantity,
-                    quantity_on_ebay: ebayResponse.data.totalQuantity,
-                    quantity_sold: response.data.quantity_sold,
-                    item_description: response.data.item_description,
-                    category: response.data.category,
-                    manufacturer: response.data.manufacturer,
-                };
-                
-                setFormData(updatedFormData);
-                // Update the part with the fetched form data
-                const updatedResponse = await axios.put(`http://localhost:8080/parts/${partNumber}`, updatedFormData);
-                // Set the part state with the updated data
-                setPart(updatedResponse.data);
-            }
-          
-        } catch (error) {
-            console.error('Error fetching part data:', error);
-        } finally {
-            setLoading(false);
+        if (response.data.quantity_on_ebay === ebayResponse.data.totalQuantity) {
+            const updatedFormData = {
+                part_number: response.data.part_number,
+                quantity: response.data.quantity,
+                quantity_on_ebay: response.data.quantity_on_ebay,
+                quantity_sold: response.data.quantity_sold,
+                item_description: response.data.item_description,
+                category: response.data.category,
+                manufacturer: response.data.manufacturer,
+            };
+            
+            setFormData(updatedFormData);
+            setPart(response.data);
+        } else {
+            const updatedFormData = {
+                part_number: response.data.part_number,
+                quantity: response.data.quantity,
+                quantity_on_ebay: ebayResponse.data.totalQuantity,
+                quantity_sold: response.data.quantity_sold,
+                item_description: response.data.item_description,
+                category: response.data.category,
+                manufacturer: response.data.manufacturer,
+            };
+            
+            setFormData(updatedFormData);
+            // Update the part with the fetched form data
+            const updatedResponse = await axios.put(`http://localhost:8080/parts/${encodedPartNumber}`, updatedFormData);
+            // Set the part state with the updated data
+            setPart(updatedResponse.data);
         }
-    };
+      
+    } catch (error) {
+        console.error('Error fetching part data:', error);
+    } finally {
+        setLoading(false);
+    }
+};
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -295,7 +298,11 @@ function Inventory() {
                                 <tbody>
                                     {filteredSerials.map((serial) => (
                                         <tr key={serial.serial_id}>
-                                            <td>{serial.serial_number}</td>
+                                            <td>{
+                                                <Link to={`/serials/${encodeURIComponent(serial.serial_number)}`}>
+                                                    {serial.serial_number}
+                                                </Link>
+                                            }</td>
                                             <td>{serial.sold === 1 ? 'Yes' : 'No'}</td>
                                             <td>{serial.locations}</td>
                                             <td>{serial.item_condition}</td>

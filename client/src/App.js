@@ -10,7 +10,6 @@ import Login from "./pages/Login";
 import Selling from "./pages/Selling";
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from './contexts/AuthContext';
-import Signup from './pages/Signup';
 import PrivateRoute from './components/PrivateRoutes';
 import VerifyEmail from './components/VerifyEmail';
 import ForgotPassword from './pages/forgotpassword';
@@ -29,7 +28,6 @@ function Layout() {
       {!isPublicRoute && !isVerifyEmailRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route 
           path="/verify-email" 
