@@ -46,7 +46,7 @@ export default function NavBar() {
               <Nav.Link as={Link} to="/home" onClick={() => setExpanded(false)}>Home</Nav.Link>
               <Nav.Link as={Link} to="/search" onClick={() => setExpanded(false)}>Search</Nav.Link>
               <Nav.Link as={Link} to="/addproduct" onClick={() => setExpanded(false)}>Add Product</Nav.Link>
-              <Nav.Link as={Link} to="/selling" onClick={() => setExpanded(false)}>Selling</Nav.Link>
+              <Nav.Link as={Link} to="/selling" onClick={() => setExpanded(false)}>Mark Sold</Nav.Link>
               {currentUser && (
                 <Button 
                   variant="link" 

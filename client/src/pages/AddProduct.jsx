@@ -132,7 +132,7 @@ function AddProduct() {
 
   return (
     <div className="container mt-5">
-      <h2 style={{ marginTop: '4.5rem' }}>Add Product</h2>
+      <h2 style={{ marginTop: '4.5rem' }}>Add Product Into Database</h2>
       {error && <Alert variant="danger">{error}</Alert>}
       <Form onSubmit={handleSubmit}>
         <Form.Group controlId="partNumber">

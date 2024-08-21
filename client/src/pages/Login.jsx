@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Form, Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
-import { Link, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import {
   MDBBtn,
   MDBContainer,
@@ -57,9 +57,6 @@ export default function Login() {
             </Form>
             <p className="small mb-5 pb-lg-3 ms-5">
               <a className="text-muted" href="/forgotpassword">Forgot password?</a>
-            </p>
-            <p className='ms-5'>
-              Don't have an account? <Link to="/signup" className="link-info">Register here</Link>
             </p>
           </div>
         </MDBCol>

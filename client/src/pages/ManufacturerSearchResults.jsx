@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Search from '../components/Search';
@@ -69,7 +69,11 @@ function ManufacturerSearchResults() {
                 <tbody>
                     {filteredParts.map(part => (
                         <tr key={part.part_number}>
-                            <td>{part.part_number}</td>
+                            <td>{
+                                <Link to={`/inventory/${encodeURIComponent(part.part_number)}`}>
+                                    {part.part_number}
+                                </Link>
+                            }</td>
                             <td>{part.quantity}</td>
                             <td>{part.quantity_on_ebay}</td>
                             <td>{part.quantity_sold}</td>

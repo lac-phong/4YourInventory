@@ -1,12 +1,12 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import axios from 'axios';
 import Search from '../components/Search';
 import '../styles/Inventory.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function SerialNumber() {
-    const { serialNumber } = useParams(); // Change here
+    const { serialNumber } = useParams();
     const [serial, setSerial] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
@@ -27,12 +27,12 @@ function SerialNumber() {
     const getSerialNumber = async (serialNumber) => {
         try {
             const response = await axios.get(`http://localhost:8080/serials/${serialNumber}`);
-            console.log("Frontend received data:", response.data); // Log the data
+            console.log("Frontend received data:", response.data);
             setSerial(response.data);
             setFormData({
                 serial_number: response.data.serial_number,
                 part_number: response.data.part_number,
-                sold: response.data.sold === 1, // Ensure boolean interpretation
+                sold: response.data.sold === 1,
                 locations: response.data.locations,
                 item_condition: response.data.item_condition,
             });
@@ -105,7 +105,9 @@ function SerialNumber() {
                                                 onChange={handleInputChange}
                                             />
                                         ) : (
-                                            serial.part_number
+                                            <Link to={`/inventory/${encodeURIComponent(serial.part_number)}`}>
+                                                {serial.part_number}
+                                            </Link>
                                         )}
                                     </td>
                                     <td>
