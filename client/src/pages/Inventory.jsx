@@ -21,6 +21,8 @@ function Inventory() {
         manufacturer: '',
     });
     const [ebayListings, setEbayListings] = useState({ items: [] });
+    const [serialEditMode, setSerialEditMode] = useState({});
+    const [serialFormData, setSerialFormData] = useState({});
 
     useEffect(() => {
         if (partNumber) {
@@ -81,6 +83,17 @@ function Inventory() {
         setFormData({ ...formData, [name]: value });
     };
 
+    const handleSerialInputChange = (e, serial_id) => {
+        const { name, value } = e.target;
+        setSerialFormData({
+            ...serialFormData,
+            [serial_id]: {
+                ...serialFormData[serial_id],
+                [name]: value,
+            },
+        });
+    };
+
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
@@ -89,6 +102,21 @@ function Inventory() {
             setEditMode(false);
         } catch (error) {
             console.error('Error updating part data:', error);
+        }
+    };
+
+    const handleSerialFormSubmit = async (e, serial) => {
+        e.preventDefault();
+    
+        try {
+            const response = await axios.put(`http://localhost:8080/serials/${serial.serial_number}`, serialFormData[serial.serial_id]);
+            setPart((prevPart) => ({
+                ...prevPart,
+                serials: prevPart.serials.map((s) => (s.serial_id === serial.serial_id ? response.data : s)),
+            }));
+            setSerialEditMode({ ...serialEditMode, [serial.serial_id]: false });
+        } catch (error) {
+            console.error('Error updating serial data:', error);
         }
     };
 
@@ -298,17 +326,69 @@ function Inventory() {
                                 <tbody>
                                     {filteredSerials.map((serial) => (
                                         <tr key={serial.serial_id}>
-                                            <td>{
-                                                <Link to={`/serials/${encodeURIComponent(serial.serial_number)}`}>
-                                                    {serial.serial_number}
-                                                </Link>
-                                            }</td>
+                                            <td>
+                                                {serialEditMode[serial.serial_id] ? (
+                                                    <input
+                                                        type="text"
+                                                        name="serial_number"
+                                                        className="form-control"
+                                                        value={serialFormData[serial.serial_id]?.serial_number || serial.serial_number}
+                                                        onChange={(e) => handleSerialInputChange(e, serial.serial_id)}
+                                                    />
+                                                ) : (
+                                                    serial.serial_number
+                                                )}
+                                            </td>
                                             <td>{serial.sold === 1 ? 'Yes' : 'No'}</td>
-                                            <td>{serial.locations}</td>
-                                            <td>{serial.item_condition}</td>
+                                            <td>
+                                                {serialEditMode[serial.serial_id] ? (
+                                                    <input
+                                                        type="text"
+                                                        name="locations"
+                                                        className="form-control"
+                                                        value={serialFormData[serial.serial_id]?.locations || serial.locations}
+                                                        onChange={(e) => handleSerialInputChange(e, serial.serial_id)}
+                                                    />
+                                                ) : (
+                                                    serial.locations
+                                                )}
+                                            </td>
+                                            <td>
+                                                {serialEditMode[serial.serial_id] ? (
+                                                    <input
+                                                        type="text"
+                                                        name="item_condition"
+                                                        className="form-control"
+                                                        value={serialFormData[serial.serial_id]?.item_condition || serial.item_condition}
+                                                        onChange={(e) => handleSerialInputChange(e, serial.serial_id)}
+                                                    />
+                                                ) : (
+                                                    serial.item_condition
+                                                )}
+                                            </td>
+                                            <td>
+                                                {serialEditMode[serial.serial_id] ? (
+                                                    <div>
+                                                        <button className="btn btn-primary" onClick={(e) => handleSerialFormSubmit(e, serial)}>
+                                                            Save
+                                                        </button>
+                                                        <button className="btn btn-secondary ml-2" onClick={() => setSerialEditMode({ ...serialEditMode, [serial.serial_id]: false })}>
+                                                            Cancel
+                                                        </button>
+                                                    </div>
+                                                ) : (
+                                                    <button className="btn btn-warning" onClick={() => {
+                                                        setSerialEditMode({ ...serialEditMode, [serial.serial_id]: true });
+                                                        setSerialFormData({ ...serialFormData, [serial.serial_id]: serial });
+                                                    }}>
+                                                        Edit
+                                                    </button>
+                                                )}
+                                            </td>
                                         </tr>
                                     ))}
                                 </tbody>
+
                             </table>
                         </div>
                     ) : (
