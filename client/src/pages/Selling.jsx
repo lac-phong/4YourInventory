@@ -1,51 +1,24 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Form, Button, Table, Container } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Form, Button, Container } from 'react-bootstrap';
 import axios from 'axios';
 
 function Selling() {
   const [partNumber, setPartNumber] = useState('');
-  const [serialNumbers, setSerialNumbers] = useState(['']);
-  const inputRefs = useRef([React.createRef()]);
+  const [serialNumbers, setSerialNumbers] = useState('');
 
-  useEffect(() => {
-    if (inputRefs.current.length > 0) {
-      inputRefs.current[inputRefs.current.length - 1].current.focus();
-    }
-  }, [serialNumbers]);
-
-  const handleAddSerialNumber = (e, index) => {
-    const { value } = e.target;
-    const list = [...serialNumbers];
-    list[index] = value;
-    if (index === serialNumbers.length - 1 && value !== '') {
-      list.push('');
-      inputRefs.current.push(React.createRef());
-    }
-    setSerialNumbers(list);
+  const handleSerialNumbersChange = (e) => {
+    setSerialNumbers(e.target.value);
   };
-
-  const handleRemoveSerialNumber = (index) => {
-    const list = [...serialNumbers];
-    list.splice(index, 1);
-    inputRefs.current.splice(index, 1);
-    setSerialNumbers(list);
-  };
-
-  const handleKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !e.target.value) {
-        e.preventDefault();
-        if (serialNumbers.length > 1) { // Ensure that there's more than one serial number input
-            handleRemoveSerialNumber(index);
-        }
-    }
-};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const payload = {
       partNumber,
-      serialNumbers: serialNumbers.filter(serial => serial !== '') // Filter out empty serial numbers
+      serialNumbers: serialNumbers
+        .split('\n')
+        .map(serial => serial.trim())
+        .filter(serial => serial !== '') // Filter out empty serial numbers
     };
 
     try {
@@ -53,8 +26,7 @@ function Selling() {
       if (response.data.updated) {
         alert('Serial numbers marked as sold successfully');
         setPartNumber('');
-        setSerialNumbers(['']);
-        inputRefs.current = [React.createRef()];
+        setSerialNumbers('');
       } else {
         alert('Failed to mark serial numbers as sold');
       }
@@ -80,35 +52,26 @@ function Selling() {
         </Form.Group>
 
         <h3 className="mt-5">Serial Numbers</h3>
-        <Table bordered>
-          <thead>
-            <tr>
-              <th>Serial Number</th>
-            </tr>
-          </thead>
-          <tbody>
-            {serialNumbers.map((serial, index) => (
-              <tr key={index}>
-                <td>
-                  <Form.Control
-                    ref={inputRefs.current[index]}
-                    type="text"
-                    value={serial}
-                    onChange={(e) => handleAddSerialNumber(e, index)}
-                    onKeyDown={(e) => handleKeyDown(e, index)}
-                    placeholder={`Scan serial number ${index + 1}`}
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <Form.Group controlId="serialNumbers">
+          <Form.Control
+            as="textarea"
+            rows={10}
+            placeholder="Paste serial numbers here, one per line"
+            value={serialNumbers}
+            onChange={handleSerialNumbersChange}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+              }
+            }}
+          />
+        </Form.Group>
 
         <Button variant="success" type="submit" className="mt-3">
           Sold
         </Button>
       </Form>
-      <br></br>
+      <br/>
     </Container>
   );
 }

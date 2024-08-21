@@ -1,51 +1,33 @@
-import React, { useState, useRef, useEffect } from 'react';
-import { Form, Button, Table, Alert } from 'react-bootstrap';
+import React, { useState } from 'react';
+import { Form, Button, Alert } from 'react-bootstrap';
 import axios from 'axios';
 import CategoryDropdown from '../components/CategoryDropdown';
-import ManufacturerDropdown from '../components/ManufacturerDropdown'; // Import the ManufacturerDropdown component
+import ManufacturerDropdown from '../components/ManufacturerDropdown'; 
 
 function AddProduct() {
   const [partNumber, setPartNumber] = useState('');
   const [location, setLocation] = useState('');
-  const [serialNumbers, setSerialNumbers] = useState(['']);
+  const [serialNumbers, setSerialNumbers] = useState('');
   const [itemDescription, setItemDescription] = useState('');
   const [category, setCategory] = useState('');
   const [newCategory, setNewCategory] = useState('');
   const [manufacturer, setManufacturer] = useState('');
-  const [newManufacturer, setNewManufacturer] = useState(''); // State to handle new manufacturer input
+  const [newManufacturer, setNewManufacturer] = useState(''); 
   const [itemCondition, setItemCondition] = useState('');
   const [error, setError] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const inputRefs = useRef([React.createRef()]);
 
-  useEffect(() => {
-    inputRefs.current[inputRefs.current.length - 1].current.focus();
-  }, [serialNumbers]);
-
-  const handleAddSerialNumber = (e, index) => {
-    const { value } = e.target;
-    const list = [...serialNumbers];
-    list[index] = value;
-    if (index === serialNumbers.length - 1 && value !== '') {
-      list.push('');
-      inputRefs.current.push(React.createRef());
-    }
-    setSerialNumbers(list);
+  const handleSerialNumbersChange = (e) => {
+    setSerialNumbers(e.target.value);
   };
 
-  const handleRemoveSerialNumber = (index) => {
-    const list = [...serialNumbers];
-    list.splice(index, 1);
-    inputRefs.current.splice(index, 1);
-    setSerialNumbers(list);
-  };
-
-  const handleKeyDown = (e, index) => {
-    if (e.key === 'Backspace' && !e.target.value) {
+  const handleKeyDown = (e) => {
+    if (e.key === 'Enter' && e.shiftKey) {
       e.preventDefault();
-      if (serialNumbers.length > 1) {
-        handleRemoveSerialNumber(index);
-      }
+      const cursorPosition = e.target.selectionStart;
+      const textBeforeCursor = serialNumbers.substring(0, cursorPosition);
+      const textAfterCursor = serialNumbers.substring(cursorPosition);
+      setSerialNumbers(`${textBeforeCursor}\n${textAfterCursor}`);
     }
   };
 
@@ -53,7 +35,9 @@ function AddProduct() {
     e.preventDefault();
     setError(null);
 
-    if (!partNumber || !location || serialNumbers.filter(serial => serial !== '').length === 0) {
+    const serialNumbersArray = serialNumbers.split(/\r?\n/).map(serial => serial.trim()).filter(serial => serial !== '');
+
+    if (!partNumber || !location || serialNumbersArray.length === 0) {
         setError('Please fill in all fields and add at least one serial number.');
         return;
     }
@@ -96,7 +80,7 @@ function AddProduct() {
     const payload = {
         partNumber,
         location,
-        serialNumbers: serialNumbers.filter(serial => serial !== ''),
+        serialNumbers: serialNumbersArray,
         item_description: itemDescription,
         category: finalCategory,
         manufacturer: finalManufacturer,
@@ -112,14 +96,13 @@ function AddProduct() {
             // Reset form
             setPartNumber('');
             setLocation('');
-            setSerialNumbers(['']);
+            setSerialNumbers('');
             setItemDescription('');
             setCategory('');
             setManufacturer('');
             setItemCondition('');
             setNewCategory('');
             setNewManufacturer('');
-            inputRefs.current = [React.createRef()];
         } else {
             setError('Failed to add product');
         }
@@ -214,30 +197,18 @@ function AddProduct() {
         </Form.Group>
 
         <h3 className="mt-5">Serial Numbers</h3>
-        <Table bordered>
-          <thead>
-            <tr>
-              <th>Serial Number</th>
-            </tr>
-          </thead>
-          <tbody>
-            {serialNumbers.map((serial, index) => (
-              <tr key={index}>
-                <td>
-                  <Form.Control
-                    ref={inputRefs.current[index]}
-                    type="text"
-                    value={serial}
-                    onChange={(e) => handleAddSerialNumber(e, index)}
-                    onKeyDown={(e) => handleKeyDown(e, index)}
-                    placeholder={`Scan serial number ${index + 1}`}
-                    className="thicker-form-control"
-                  />
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </Table>
+        <Form.Group controlId="serialNumbers">
+          <Form.Label>Paste Serial Numbers (each on a new line)</Form.Label>
+          <Form.Control
+            as="textarea"
+            rows={5}
+            value={serialNumbers}
+            onChange={handleSerialNumbersChange}
+            onKeyDown={handleKeyDown}
+            placeholder="Paste serial numbers here"
+            className="thicker-form-control"
+          />
+        </Form.Group>
 
         <Button variant="success" type="submit" className="mt-3" disabled={isSubmitting}>
           {isSubmitting ? 'Submitting...' : 'Submit'}
