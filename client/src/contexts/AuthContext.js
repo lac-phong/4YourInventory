@@ -15,7 +15,6 @@ export function AuthProvider({ children }) {
     try {
       const userCredential = await auth.createUserWithEmailAndPassword(email, password);
       const user = userCredential.user;
-      await user.sendEmailVerification();
       return user;
     } catch (error) {
       throw error;
