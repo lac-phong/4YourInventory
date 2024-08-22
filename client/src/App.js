@@ -8,35 +8,24 @@ import Inventory from "./pages/Inventory";
 import SerialNumber from './pages/SerialNumber';
 import Login from "./pages/Login";
 import Selling from "./pages/Selling";
-import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
-import { AuthProvider, useAuth } from './contexts/AuthContext';
+import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoutes';
-import VerifyEmail from './components/VerifyEmail';
 import ForgotPassword from './pages/forgotpassword';
 import ManufacturerSearchResults from "./pages/ManufacturerSearchResults";
 import CategorySearchResults from "./pages/CategorySearchResults";
 
 function Layout() {
   const location = useLocation();
-  const { currentUser } = useAuth();
 
-  const isPublicRoute = ["/", "/signup", "/forgotpassword"].includes(location.pathname);
-  const isVerifyEmailRoute = location.pathname === "/verify-email";
+  const isPublicRoute = ["/", "/forgotpassword"].includes(location.pathname);
 
   return (
     <div className="router-wrapper">
-      {!isPublicRoute && !isVerifyEmailRoute && <Navbar />}
+      {!isPublicRoute && <Navbar />}
       <Routes>
         <Route path="/" element={<Login />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
-        <Route 
-          path="/verify-email" 
-          element={
-            currentUser && !currentUser.emailVerified ? 
-            <VerifyEmail /> : 
-            <Navigate to="/" replace />
-          } 
-        />
         <Route element={<PrivateRoute />}>
           <Route path="/home" element={<Dashboard />} />
           <Route path="/search" element={<Search />} />

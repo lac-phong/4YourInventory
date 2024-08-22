@@ -11,11 +11,6 @@ const PrivateRoute = () => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  if (currentUser.emailVerified === false) {
-    // Redirect to the verify-email page if email is not verified
-    return <Navigate to="/verify-email" state={{ from: location }} replace />;
-  }
-
   // If authenticated and email verified, render the protected route
   return <Outlet />;
 };
