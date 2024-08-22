@@ -3,7 +3,6 @@ import { Form, Button, Container } from 'react-bootstrap';
 import axios from 'axios';
 
 function Selling() {
-  const [partNumber, setPartNumber] = useState('');
   const [serialNumbers, setSerialNumbers] = useState('');
 
   const handleSerialNumbersChange = (e) => {
@@ -14,7 +13,6 @@ function Selling() {
     e.preventDefault();
 
     const payload = {
-      partNumber,
       serialNumbers: serialNumbers
         .split('\n')
         .map(serial => serial.trim())
@@ -25,7 +23,6 @@ function Selling() {
       const response = await axios.put('http://localhost:8080/serials', payload);
       if (response.data.updated) {
         alert('Serial numbers marked as sold successfully');
-        setPartNumber('');
         setSerialNumbers('');
       } else {
         alert('Failed to mark serial numbers as sold');
@@ -40,23 +37,12 @@ function Selling() {
     <Container className="mt-5">
       <h2 style={{ marginTop: '4.5rem' }}>Mark as Sold</h2>
       <Form onSubmit={handleSubmit}>
-        <Form.Group controlId="partNumber">
-          <Form.Label>Part Number</Form.Label>
-          <Form.Control
-            type="text"
-            placeholder="Enter part number"
-            value={partNumber}
-            onChange={(e) => setPartNumber(e.target.value)}
-            required
-          />
-        </Form.Group>
-
-        <h3 className="mt-5">Serial Numbers</h3>
+        <h4 className="mt-2">Serial Numbers - One Per Line</h4>
         <Form.Group controlId="serialNumbers">
           <Form.Control
             as="textarea"
             rows={10}
-            placeholder="Paste serial numbers here, one per line"
+            placeholder="Paste serial numbers here, the database will auto-handle differing part numbers"
             value={serialNumbers}
             onChange={handleSerialNumbersChange}
             onKeyDown={(e) => {
