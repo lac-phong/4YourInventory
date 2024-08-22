@@ -145,13 +145,13 @@ app.put("/serials/:serial_number", async (req, res) => {
 
 // EXTERNAL: mark serial numbers as sold
 app.put("/serials", async (req, res) => {
-    const { partNumber, serialNumbers } = req.body;
-    if (!partNumber || !serialNumbers || !serialNumbers.length) {
-        return res.status(400).json({ error: 'Part number and serial numbers are required' });
+    const { serialNumbers } = req.body;
+    if (!serialNumbers || !serialNumbers.length) {
+        return res.status(400).json({ error: 'Serial numbers are required' });
     }
 
     try {
-        const result = await markSerialNumbersAsSold(partNumber, serialNumbers);
+        const result = await markSerialNumbersAsSold(serialNumbers);
         res.json(result);
     } catch (error) {
         console.error('Error updating serial numbers:', error.message);

@@ -172,44 +172,53 @@ export async function updateSerial(serial_number, updates) {
 }
 
 // Function to sell serial numbers
-export async function markSerialNumbersAsSold(partNumber, serialNumbers) {
+export async function markSerialNumbersAsSold(serialNumbers) {
     if (!serialNumbers.length) {
         throw new Error('No serial numbers provided for update');
     }
 
-    // Create a string of placeholders for the `IN` clause
-    const placeholders = serialNumbers.map(() => '?').join(', ');
-
-    // Start a transaction
     const connection = await pool.getConnection();
     try {
         await connection.beginTransaction();
 
-        // Step 1: Mark the serial numbers as sold
-        const sqlUpdateSerials = `
-          UPDATE fouyourb_4yourinventory.serials
-          SET sold = 1
-          WHERE part_number = ? AND serial_number IN (${placeholders});
-        `;
-        const [updateResult] = await connection.query(sqlUpdateSerials, [partNumber, ...serialNumbers]);
+        for (const serial of serialNumbers) {
+            // Step 1: Get the part number for the serial number where sold is either 0 or null
+            const sqlGetPartNumber = `
+              SELECT part_number FROM fouyourb_4yourinventory.serials
+              WHERE serial_number = ? AND (sold = 0 OR sold IS NULL);
+            `;
+            const [partNumberResults] = await connection.query(sqlGetPartNumber, [serial]);
 
-        if (updateResult.affectedRows === 0) {
-            throw new Error('Update failed, serial numbers not found or already marked as sold');
-        }
+            if (partNumberResults.length === 0) {
+                throw new Error(`Serial number ${serial} not found or already marked as sold`);
+            }
 
-        // Step 2: Update the parts table
-        // Calculate the number of serial numbers sold
-        const quantitySold = serialNumbers.length;
-        const sqlUpdateParts = `
-          UPDATE fouyourb_4yourinventory.parts
-          SET quantity = quantity - ?,
-              quantity_sold = quantity_sold + ?
-          WHERE part_number = ?;
-        `;
-        const [updatePartsResult] = await connection.query(sqlUpdateParts, [quantitySold, quantitySold, partNumber]);
+            const partNumber = partNumberResults[0].part_number;
 
-        if (updatePartsResult.affectedRows === 0) {
-            throw new Error('Update failed, part number not found');
+            // Step 2: Mark the serial number as sold
+            const sqlUpdateSerial = `
+              UPDATE fouyourb_4yourinventory.serials
+              SET sold = 1
+              WHERE serial_number = ?;
+            `;
+            const [updateSerialResult] = await connection.query(sqlUpdateSerial, [serial]);
+
+            if (updateSerialResult.affectedRows === 0) {
+                throw new Error(`Failed to mark serial number ${serial} as sold`);
+            }
+
+            // Step 3: Update the part's quantity
+            const sqlUpdatePart = `
+              UPDATE fouyourb_4yourinventory.parts
+              SET quantity = quantity - 1,
+                  quantity_sold = quantity_sold + 1
+              WHERE part_number = ?;
+            `;
+            const [updatePartResult] = await connection.query(sqlUpdatePart, [partNumber]);
+
+            if (updatePartResult.affectedRows === 0) {
+                throw new Error(`Failed to update part number ${partNumber} for serial number ${serial}`);
+            }
         }
 
         // Commit the transaction
@@ -223,6 +232,7 @@ export async function markSerialNumbersAsSold(partNumber, serialNumbers) {
         connection.release(); // Release the connection back to the pool
     }
 }
+
 
 // MANUFACTURER SEARCH
 export async function getPartsByManufacturer(manufacturer) {
