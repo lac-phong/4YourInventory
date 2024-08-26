@@ -17,7 +17,7 @@ const pool = mysql.createPool({
 // ------------------------------------------------------------- PART NUMBERS -------------------------------------------------------------------------//
 
 async function getAllParts() {
-    const sql = `SELECT * FROM movedbtwo.parts;`;
+    const sql = `SELECT * FROM fouyourb_4yourinventory.parts;`;
     try {
         const [rows] = await pool.query(sql);
         return rows; // Directly return rows; no need to map here
@@ -156,7 +156,7 @@ async function updateSerial(serial_number, updates) {
     `;
 
     try {
-        console.log('Parameters:', [part_number, sold, locations, item_condition, serial_number]);
+        console.log('Parameters:', [ part_number, sold, locations, item_condition, serial_number]);
 
         const [result] = await pool.query(sql, [part_number, sold, locations, item_condition, serial_number]);
         if (result.affectedRows) {
@@ -264,7 +264,7 @@ async function getPartsByCategory(category) {
 
 // Function to get all unique categories
 async function getAllCategories() {
-    const sql = `SELECT category FROM movedbtwo.unique_categories ORDER BY category;`;
+    const sql = `SELECT category FROM fouyourb_4yourinventory.unique_categories ORDER BY category;`;
     try {
         const [rows] = await pool.query(sql);
         return rows.map(row => row.category);
@@ -337,7 +337,7 @@ async function deleteCategory(category) {
 
 // Function to get all unique manufacturers
 async function getAllManufacturers() {
-    const sql = `SELECT manufacturer FROM movedbtwo.unique_manufacturers ORDER BY manufacturer;`;
+    const sql = `SELECT manufacturer FROM fouyourb_4yourinventory.unique_manufacturers ORDER BY manufacturer;`;
     try {
         const [rows] = await pool.query(sql);
         return rows.map(row => row.manufacturer);

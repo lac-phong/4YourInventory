@@ -108,7 +108,15 @@ function Inventory() {
         e.preventDefault();
     
         try {
-            const response = await window.electron.ipcRenderer.invoke('update-serial', serialFormData[serial.serial_id]);
+            const updatedSerialData = {
+                serial_number: serialFormData[serial.serial_id].serial_number,
+                part_number: part.part_number, // Assuming you want to keep the part number the same
+                sold: serial.sold, // Keep the existing sold status if you're not updating it
+                locations: serialFormData[serial.serial_id].locations,
+                item_condition: serialFormData[serial.serial_id].item_condition
+            };
+    
+            const response = await window.electron.ipcRenderer.invoke('update-serial', serial.serial_number, updatedSerialData);
             setPart((prevPart) => ({
                 ...prevPart,
                 serials: prevPart.serials.map((s) => (s.serial_id === serial.serial_id ? response : s)),
@@ -300,8 +308,12 @@ function Inventory() {
                                             <a
                                                 href="#"
                                                 onClick={(e) => {
-                                                e.preventDefault();
-                                                window.electron.shell.openExternal(item.itemWebUrl);
+                                                    e.preventDefault();
+                                                    if (window.electron && window.electron.shell) {
+                                                        window.electron.shell.openExternal(item.itemWebUrl);
+                                                    } else {
+                                                        window.open(item.itemWebUrl, '_blank', 'noopener,noreferrer');
+                                                    }
                                                 }}
                                             >
                                                 View Listing

@@ -73,6 +73,12 @@ async function main() {
     
     // Open the DevTools if needed
     //mainWindow.webContents.openDevTools()
+    mainWindow.webContents.on('before-input-event', (event, input) => {
+      if ((input.meta && input.key === 'r') || (input.control && input.key === 'r')) {
+        event.preventDefault(); // Prevent the default behavior
+        console.log('Shortcut Cmd+R or Ctrl+R is disabled');
+      }
+    });
   }
 
   // This method will be called when Electron has finished
