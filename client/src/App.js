@@ -8,7 +8,7 @@ import Inventory from "./pages/Inventory";
 import SerialNumber from './pages/SerialNumber';
 import Login from "./pages/Login";
 import Selling from "./pages/Selling";
-import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
+import { HashRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoutes';
 import ForgotPassword from './pages/forgotpassword';
