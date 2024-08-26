@@ -1,22 +1,49 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import Search from '../components/Search';
 
 function CategorySearchResults() {
     const { category } = useParams();
     const [parts, setParts] = useState([]);
+    const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        axios.get(`http://localhost:8080/parts/category/${category}`)
-            .then(response => {
-                setParts(response.data);
-            })
-            .catch(error => {
-                console.error('Error fetching parts:', error);
-            });
+        if (category) {
+            getItemsByCategory(category);
+        }
     }, [category]);
+
+    const getItemsByCategory = async (category) => {
+        try {
+            setLoading(true);
+            const response = await window.electron.ipcRenderer.invoke('get-parts-by-category', category)
+            setParts(response)
+        } catch (error) {
+            console.error('Error fetching part data:', error);
+        } finally {
+            setLoading(false);
+        }
+    }
+
+    if (loading) {
+        return (
+            <div style={{
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                height: '100vh',
+                fontSize: '48px',
+                fontWeight: 'bold',
+                color: 'green'
+            }}>
+                <div className="spinner-border" role="status" style={{ marginRight: '10px' }}>
+                    <span className="sr-only">Loading...</span>
+                </div>
+                LOADING
+            </div>
+        );
+    }
 
     return (
         <div className='container mt-4'>

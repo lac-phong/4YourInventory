@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import Search from '../components/Search';
 import '../styles/Inventory.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -31,52 +30,52 @@ function Inventory() {
     }, [partNumber]);
 
     const getPartNumber = async (partNumber) => {
-    try {
-        setLoading(true);
-        // Encode the part number to handle special characters
-        const encodedPartNumber = encodeURIComponent(partNumber);
-        
-        const response = await axios.get(`http://localhost:8080/parts/${encodedPartNumber}`);
-        const ebayResponse = await axios.get(`http://localhost:8080/item/${encodedPartNumber}`);
-        setEbayListings(ebayResponse);
+        try {
+            setLoading(true);
+            // Encode the part number to handle special characters
+            const encodedPartNumber = encodeURIComponent(partNumber);
+            const response = await window.electron.ipcRenderer.invoke('get-part-by-number', encodedPartNumber);
+            const ebayResponse = await window.electron.ipcRenderer.invoke('get-ebay-item', encodedPartNumber);
 
-        if (response.data.quantity_on_ebay === ebayResponse.data.totalQuantity) {
-            const updatedFormData = {
-                part_number: response.data.part_number,
-                quantity: response.data.quantity,
-                quantity_on_ebay: response.data.quantity_on_ebay,
-                quantity_sold: response.data.quantity_sold,
-                item_description: response.data.item_description,
-                category: response.data.category,
-                manufacturer: response.data.manufacturer,
-            };
-            
-            setFormData(updatedFormData);
-            setPart(response.data);
-        } else {
-            const updatedFormData = {
-                part_number: response.data.part_number,
-                quantity: response.data.quantity,
-                quantity_on_ebay: ebayResponse.data.totalQuantity,
-                quantity_sold: response.data.quantity_sold,
-                item_description: response.data.item_description,
-                category: response.data.category,
-                manufacturer: response.data.manufacturer,
-            };
-            
-            setFormData(updatedFormData);
-            // Update the part with the fetched form data
-            const updatedResponse = await axios.put(`http://localhost:8080/parts/${encodedPartNumber}`, updatedFormData);
-            // Set the part state with the updated data
-            setPart(updatedResponse.data);
+            setEbayListings(ebayResponse)
+
+            if (response.quantity_on_ebay === ebayResponse.totalQuantity) {
+                const updatedFormData = {
+                    part_number: response.part_number,
+                    quantity: response.quantity,
+                    quantity_on_ebay: response.quantity_on_ebay,
+                    quantity_sold: response.quantity_sold,
+                    item_description: response.item_description,
+                    category: response.category,
+                    manufacturer: response.manufacturer,
+                };
+                
+                setFormData(updatedFormData);
+                setPart(response);
+            } else {
+                const updatedFormData = {
+                    part_number: response.part_number,
+                    quantity: response.quantity,
+                    quantity_on_ebay: ebayResponse.totalQuantity,
+                    quantity_sold: response.quantity_sold,
+                    item_description: response.item_description,
+                    category: response.category,
+                    manufacturer: response.manufacturer,
+                };
+                
+                setFormData(updatedFormData);
+                // Update the part with the fetched form data
+                const updatedResponse = await window.electron.ipcRenderer.invoke('update-part', encodedPartNumber, updatedFormData);
+                // Set the part state with the updated data
+                setPart(updatedResponse);
+            }
+          
+        } catch (error) {
+            console.error('Error fetching part data:', error);
+        } finally {
+            setLoading(false);
         }
-      
-    } catch (error) {
-        console.error('Error fetching part data:', error);
-    } finally {
-        setLoading(false);
-    }
-};
+    };
 
     const handleInputChange = (e) => {
         const { name, value } = e.target;
@@ -97,8 +96,8 @@ function Inventory() {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`http://localhost:8080/parts/${formData.part_number}`, formData);
-            setPart(response.data);
+            const response = await window.electron.ipcRenderer.invoke('update-part', formData.part_number, formData);
+            setPart(response);
             setEditMode(false);
         } catch (error) {
             console.error('Error updating part data:', error);
@@ -109,10 +108,18 @@ function Inventory() {
         e.preventDefault();
     
         try {
-            const response = await axios.put(`http://localhost:8080/serials/${serial.serial_number}`, serialFormData[serial.serial_id]);
+            const updatedSerialData = {
+                serial_number: serialFormData[serial.serial_id].serial_number,
+                part_number: part.part_number, // Assuming you want to keep the part number the same
+                sold: serial.sold, // Keep the existing sold status if you're not updating it
+                locations: serialFormData[serial.serial_id].locations,
+                item_condition: serialFormData[serial.serial_id].item_condition
+            };
+    
+            const response = await window.electron.ipcRenderer.invoke('update-serial', serial.serial_number, updatedSerialData);
             setPart((prevPart) => ({
                 ...prevPart,
-                serials: prevPart.serials.map((s) => (s.serial_id === serial.serial_id ? response.data : s)),
+                serials: prevPart.serials.map((s) => (s.serial_id === serial.serial_id ? response : s)),
             }));
             setSerialEditMode({ ...serialEditMode, [serial.serial_id]: false });
         } catch (error) {
@@ -285,17 +292,33 @@ function Inventory() {
                                     <th>Price</th>
                                     <th>Condition</th>
                                     <th>Quantity</th>
+                                    <th>Link</th>
                                 </tr>
                             </thead>
                             <tbody>
-                            {ebayListings.data.items.map((item, index) => {
+                            {ebayListings.items.map((item, index) => {
                                 console.log(item); // Check the structure of each item
                                 return (
                                     <tr key={index}>
                                         <td>{item.title}</td>
-                                        <td>${item.price.value}</td>
+                                        <td>{item.price.value}</td>
                                         <td>{item.condition}</td>
                                         <td>{item.quantity}</td>
+                                        <td>
+                                            <a
+                                                href="#"
+                                                onClick={(e) => {
+                                                    e.preventDefault();
+                                                    if (window.electron && window.electron.shell) {
+                                                        window.electron.shell.openExternal(item.itemWebUrl);
+                                                    } else {
+                                                        window.open(item.itemWebUrl, '_blank', 'noopener,noreferrer');
+                                                    }
+                                                }}
+                                            >
+                                                View Listing
+                                            </a>
+                                        </td>
                                     </tr>
                                 );
                             })}

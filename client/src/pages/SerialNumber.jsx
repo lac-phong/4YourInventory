@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import axios from 'axios';
 import Search from '../components/Search';
 import '../styles/Inventory.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
@@ -26,15 +25,15 @@ function SerialNumber() {
 
     const getSerialNumber = async (serialNumber) => {
         try {
-            const response = await axios.get(`http://localhost:8080/serials/${serialNumber}`);
-            console.log("Frontend received data:", response.data);
-            setSerial(response.data);
+            const response = await window.electron.ipcRenderer.invoke('get-serial', serialNumber);
+            console.log("Frontend received data:", response); // Log the data
+            setSerial(response);
             setFormData({
-                serial_number: response.data.serial_number,
-                part_number: response.data.part_number,
-                sold: response.data.sold === 1,
-                locations: response.data.locations,
-                item_condition: response.data.item_condition,
+                serial_number: response.serial_number,
+                part_number: response.part_number,
+                sold: response.sold === 1, // Ensure boolean interpretation
+                locations: response.locations,
+                item_condition: response.item_condition,
             });
         } catch (error) {
             console.error('Error fetching serial data:', error);
@@ -51,8 +50,8 @@ function SerialNumber() {
     const handleFormSubmit = async (e) => {
         e.preventDefault();
         try {
-            const response = await axios.put(`http://localhost:8080/serials/${formData.serial_number}`, formData);
-            setSerial(response.data);
+            const response = await window.electron.ipcRenderer.invoke('update-serial', formData.serial_number, formData);
+            setSerial(response);
             setEditMode(false);
         } catch (error) {
             console.error('Error updating serial data:', error);

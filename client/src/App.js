@@ -1,14 +1,14 @@
 import './App.css';
 import Navbar from "./components/Navbar";
 import Footer from "./components/Footer";
-import Search from "./pages/Home";
+import Search from "./pages/SearchPage";
 import Dashboard from "./pages/Dash";
 import AddProduct from "./pages/AddProduct";
 import Inventory from "./pages/Inventory";
 import SerialNumber from './pages/SerialNumber';
 import Login from "./pages/Login";
 import Selling from "./pages/Selling";
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext';
 import PrivateRoute from './components/PrivateRoutes';
 import ForgotPassword from './pages/forgotpassword';
@@ -24,6 +24,7 @@ function Layout() {
     <div className="router-wrapper">
       {!isPublicRoute && <Navbar />}
       <Routes>
+        <Route path="*" element={<Navigate to="/" />} />
         <Route path="/" element={<Login />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} />
         <Route element={<PrivateRoute />}>
