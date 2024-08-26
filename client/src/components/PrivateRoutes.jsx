@@ -11,7 +11,7 @@ const PrivateRoute = () => {
     return <Navigate to="/" state={{ from: location }} replace />;
   }
 
-  // If authenticated, render the protected route
+  // If authenticated and email verified, render the protected route
   return <Outlet />;
 };
 

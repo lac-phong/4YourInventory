@@ -10,25 +10,24 @@ import Login from "./pages/Login";
 import Selling from "./pages/Selling";
 import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext';
-import Signup from './pages/Signup';
 import PrivateRoute from './components/PrivateRoutes';
-import ForgotPassword from './pages/ForgotPassword';
-import ManufacturerSearchResults from "./pages/ManufacturerSearchResults"; // Import the new component
-import CategorySearchResults from "./pages/CategorySearchResults"; // Import the new component
+import ForgotPassword from './pages/forgotpassword';
+import ManufacturerSearchResults from "./pages/ManufacturerSearchResults";
+import CategorySearchResults from "./pages/CategorySearchResults";
 
 function Layout() {
   const location = useLocation();
 
+  const isPublicRoute = ["/", "/forgotpassword"].includes(location.pathname);
+
   return (
-    <AuthProvider>
     <div className="router-wrapper">
-      {location.pathname !== "/" && location.pathname !== "/signup" && location.pathname !== "/forgotpassword" && <Navbar />}
+      {!isPublicRoute && <Navbar />}
       <Routes>
         <Route path="*" element={<Navigate to="/" />} />
         <Route path="/" element={<Login />} />
-        <Route path="/signup" element={<Signup />} />
-        <Route path="/forgotpassword" element={<ForgotPassword />} /> 
-        <Route path="/" element={<PrivateRoute />}>
+        <Route path="/forgotpassword" element={<ForgotPassword />} />
+        <Route element={<PrivateRoute />}>
           <Route path="/home" element={<Dashboard />} />
           <Route path="/search" element={<Search />} />
           <Route path="/addproduct" element={<AddProduct />} />
@@ -40,16 +39,17 @@ function Layout() {
         </Route>
       </Routes>
     </div>
-    </AuthProvider>
-  ); 
+  );
 }
 
 function App() {
   return (
     <div className="App">
       <Router>
-        <Layout />
-        <Footer />
+        <AuthProvider>
+          <Layout />
+          <Footer />
+        </AuthProvider>
       </Router>
     </div>
   );

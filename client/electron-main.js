@@ -58,8 +58,8 @@ async function main() {
 
   function createWindow() {
     const mainWindow = new BrowserWindow({
-      width: 800,
-      height: 600,
+      width: 2560,
+      height: 1600,
       webPreferences: {
         preload: path.join(__dirname, "preload.js"),
         nodeIntegration: false,
@@ -170,9 +170,9 @@ async function main() {
     }
   });
 
-  ipcMain.handle('mark-serials-sold', async (event, partNumber, serialNumbers) => {
+  ipcMain.handle('mark-serials-sold', async (event, serialNumbers) => {
     try {
-        return await markSerialNumbersAsSold(partNumber, serialNumbers);
+        return await markSerialNumbersAsSold(serialNumbers);
     } catch (error) {
         throw error;
     }

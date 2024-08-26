@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { Container, Row, Col, Card, Button, Table, Dropdown } from 'react-bootstrap';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import 'bootstrap/dist/css/bootstrap.min.css';
 import '../styles/Dash.css';
 
@@ -99,7 +99,11 @@ function Dash() {
                       {filteredParts.length > 0 ? (
                         filteredParts.map((part, index) => (
                           <tr key={index}>
-                            <td className="col-part-number">{part.part_number}</td>
+                            <td className="col-part-number">{
+                              <Link to={`/inventory/${encodeURIComponent(part.part_number)}`}>
+                                {part.part_number}
+                              </Link>
+                                }</td>
                             <td className="col-quantity">{part.quantity}</td>
                             <td className="col-quantity-ebay">{part.quantity_on_ebay}</td>
                             <td className="col-quantity-sold">{part.quantity_sold}</td>

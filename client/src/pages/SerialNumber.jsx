@@ -1,11 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import Search from '../components/Search';
 import '../styles/Inventory.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
 
 function SerialNumber() {
-    const { serialNumber } = useParams(); // Change here
+    const { serialNumber } = useParams();
     const [serial, setSerial] = useState(null);
     const [editMode, setEditMode] = useState(false);
     const [formData, setFormData] = useState({
@@ -104,7 +104,9 @@ function SerialNumber() {
                                                 onChange={handleInputChange}
                                             />
                                         ) : (
-                                            serial.part_number
+                                            <Link to={`/inventory/${encodeURIComponent(serial.part_number)}`}>
+                                                {serial.part_number}
+                                            </Link>
                                         )}
                                     </td>
                                     <td>

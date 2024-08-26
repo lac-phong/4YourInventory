@@ -53,7 +53,7 @@ export default function ForgotPassword() {
           </form>
 
           <div className="text-center mt-3">
-            <Link to="/">Login</Link>
+            <Link to="/">Back to Login</Link>
           </div>
 
           <div className="w-100 text-center mt-2">

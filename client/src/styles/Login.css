@@ -1,3 +1,29 @@
+/* Base font size for the title */
+.display-4 {
+  font-size: 2.5rem; /* Default size */
+}
+
+/* Medium screens (tablets, 768px and up) */
+@media (min-width: 768px) {
+  .display-4 {
+    font-size: 3rem; /* Slightly larger */
+  }
+}
+
+/* Large screens (desktops, 1024px and up) */
+@media (min-width: 1024px) {
+  .display-4 {
+    font-size: 3.5rem; /* Even larger */
+  }
+}
+
+/* Extra-large screens (1200px and up) */
+@media (min-width: 1200px) {
+  .display-4 {
+    font-size: 4rem; /* Full size */
+  }
+}
+
 @media (min-width: 1025px) {
   .h-custom-2 {
     height: 100%;
@@ -20,10 +46,7 @@
   height: calc(100% - 80px);
 }
 
-.display-3 {
-  font-size: 3rem; /* Increase the font size of the heading */
-}
-
+/* Adjust width of the content area */
 .d-flex.flex-column.justify-content-center.h-custom-2 {
-  width: 80%; /* Custom width to make the text box area wider */
+  width: 80%;
 }
