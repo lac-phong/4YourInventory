@@ -8,7 +8,7 @@ import Inventory from "./pages/Inventory";
 import SerialNumber from './pages/SerialNumber';
 import Login from "./pages/Login";
 import Selling from "./pages/Selling";
-import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
+import { BrowserRouter as Router, Route, Routes, useLocation, Navigate } from "react-router-dom";
 import { AuthProvider } from './contexts/AuthContext';
 import Signup from './pages/Signup';
 import PrivateRoute from './components/PrivateRoutes';
@@ -24,6 +24,7 @@ function Layout() {
     <div className="router-wrapper">
       {location.pathname !== "/" && location.pathname !== "/signup" && location.pathname !== "/forgotpassword" && <Navbar />}
       <Routes>
+        <Route path="*" element={<Navigate to="/" />} />
         <Route path="/" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
         <Route path="/forgotpassword" element={<ForgotPassword />} /> 

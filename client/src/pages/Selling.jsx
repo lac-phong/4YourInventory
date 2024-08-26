@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Button, Table, Container } from 'react-bootstrap';
-import axios from 'axios';
 
 function Selling() {
   const [partNumber, setPartNumber] = useState('');

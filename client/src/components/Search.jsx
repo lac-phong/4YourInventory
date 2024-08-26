@@ -4,16 +4,22 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import CategoryDropdown from './CategoryDropdown';
 import ManufacturerDropdown from './ManufacturerDropdown'; // Import the new component
 import '../styles/Search.css';
-import axios from 'axios';
-import BannerImage from "../assets/homeBack.png";
 
 function Search() {
+
     const [input, setInput] = useState("");
     const [searchType, setSearchType] = useState("part_number");
     const [categories, setCategories] = useState([]);
     const [manufacturers, setManufacturers] = useState([]); // State to hold manufacturers
     const navigate = useNavigate();
     const [isEditing, setIsEditing] = useState(false);
+    const [logoPath, setLogoPath] = useState('');
+
+    useEffect(() => {
+        window.electron.ipcRenderer.invoke('get-image-path', 'homeBack.png').then((imagePath) => {
+          setLogoPath(imagePath);
+        });
+      }, []);
 
     useEffect(() => {
         const savedSearchType = sessionStorage.getItem("searchType");
@@ -112,7 +118,7 @@ function Search() {
     return (
         <div className='container mt-4'>
             <div className='imageCont'>
-                <img src={BannerImage} alt="Logo" />
+                {logoPath && <img src={logoPath} alt="Logo" />}
             </div>
             <form onSubmit={handleSubmit} className='d-flex flex-column'>
                 <div className='d-flex align-items-center mb-3'>

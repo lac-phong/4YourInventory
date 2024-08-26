@@ -1,6 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { Form, Button, Table, Alert } from 'react-bootstrap';
-import axios from 'axios';
 import CategoryDropdown from '../components/CategoryDropdown';
 import ManufacturerDropdown from '../components/ManufacturerDropdown'; // Import the ManufacturerDropdown component
 

@@ -1,5 +1,4 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
 
 const CategoryDropdown = ({ selectedCategory, onChange, className }) => {
     const [categories, setCategories] = useState([]);

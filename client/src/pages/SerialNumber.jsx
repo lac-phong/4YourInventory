@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
-import axios from 'axios';
 import Search from '../components/Search';
 import '../styles/Inventory.css';
 import 'bootstrap/dist/css/bootstrap.min.css';

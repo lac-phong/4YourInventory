@@ -1,5 +1,4 @@
-import React, { useState } from "react";
-import Logo from "../assets/logo4yb.png";
+import React, { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import ReorderIcon from '@mui/icons-material/Reorder';
 import "../styles/Navbar.css";
@@ -7,11 +6,19 @@ import { Alert } from "react-bootstrap";
 import { useAuth } from "../contexts/AuthContext";
 
 export default function Navbar() {
+
   const [openLinks, setOpenLinks] = useState(false);
+  const [logoPath, setLogoPath] = useState('');
 
   const [error, setError] = useState("")
   const { currentUser, logout } = useAuth()
   const navigate = useNavigate()
+
+  useEffect(() => {
+    window.electron.ipcRenderer.invoke('get-image-path', 'logo4yb.png').then((imagePath) => {
+      setLogoPath(imagePath);
+    });
+  }, []);
 
 
   async function handleLogout(){
@@ -30,7 +37,7 @@ export default function Navbar() {
   return (
     <div className="navbar">
       <div className="leftSide" id={openLinks ? "open" : "close"}>
-        <img src={Logo} />
+        {logoPath && <img src={logoPath} alt="Logo" />}
         <div className="hiddenLinks">
           <Link to="/home"> Home </Link>
           <Link to="/search"> Search </Link>
