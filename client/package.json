@@ -4,6 +4,8 @@
   "private": true,
   "homepage": "./",
   "main": "electron-main.js",
+  "description": "Inventory management for 4yb",
+  "author": "TINHTUELAC",
   "dependencies": {
     "@emotion/react": "^11.11.4",
     "@emotion/styled": "^11.11.5",
