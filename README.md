@@ -8,24 +8,38 @@
 
 ### Development
 
-1. Navigate to the `client` directory:
+1. Navigate to the client directory:
+
    ```cd client```
+
 2. Install dependencies:
+
    ```npm install```
+
 3. Build React app:
+
    ```npm run build```
+
 4. Start Electron app:
+
    ```npm run electron```
 
 ### Production
 
-1. Navigate to the `client` directory:
+1. Navigate to the client directory:
+
    ```cd client```
+
 2. Install dependencies:
+
    ```npm install```
+
 3. Build React app:
+
    ```npm run build```
+
 4. Start Electron app:
+
    ```npm run make```
    
    This will create an out folder containing a zip file for the distributable app and the Electron app itself.
