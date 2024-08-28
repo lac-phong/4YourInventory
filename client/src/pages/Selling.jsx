@@ -11,24 +11,25 @@ function Selling() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const payload = {
-      serialNumbers: serialNumbers
-        .split('\n')
-        .map(serial => serial.trim())
-        .filter(serial => serial !== '') // Filter out empty serial numbers
-    };
+    const serialsArray = serialNumbers
+      .split('\n')
+      .map(serial => serial.trim())
+      .filter(serial => serial !== ''); // Ensure non-empty serial numbers
+
+    // Check if serialsArray is empty and display an alert
+    if (serialsArray.length === 0) {
+      return;
+    }
+
+    const payload = { serialNumbers: serialsArray };
 
     try {
       const response = await window.electron.ipcRenderer.invoke('mark-serials-sold', payload);
       if (response.updated) {
-        alert('Serial numbers marked as sold successfully');
-        setSerialNumbers('');
-      } else {
-        alert('Failed to mark serial numbers as sold');
+        setSerialNumbers(''); // Clear the input field
       }
     } catch (error) {
       console.error('Error marking serial numbers as sold:', error);
-      alert('Error marking serial numbers as sold');
     }
   };
 
@@ -36,27 +37,20 @@ function Selling() {
     <Container className="mt-5">
       <h2 style={{ marginTop: '4.5rem' }}>Mark as Sold</h2>
       <Form onSubmit={handleSubmit}>
-        <h4 className="mt-2">Serial Numbers - One Per Line</h4>
         <Form.Group controlId="serialNumbers">
+          <Form.Label>Serial Numbers (one per line)</Form.Label>
           <Form.Control
             as="textarea"
             rows={10}
-            placeholder="Paste serial numbers here, the database will auto-handle differing part numbers"
             value={serialNumbers}
             onChange={handleSerialNumbersChange}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-              }
-            }}
+            placeholder="Enter serial numbers here, one per line"
           />
         </Form.Group>
-
-        <Button variant="success" type="submit" className="mt-3">
-          Sold
+        <Button variant="primary" type="submit">
+          Mark
         </Button>
       </Form>
-      <br/>
     </Container>
   );
 }
