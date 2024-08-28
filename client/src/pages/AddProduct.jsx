@@ -91,7 +91,6 @@ function AddProduct() {
         const response = await window.electron.ipcRenderer.invoke('insert-part', payload);
         setIsSubmitting(false);
         if (response.inserted) {
-            alert('Product added successfully');
             // Reset form
             setPartNumber('');
             setLocation('');

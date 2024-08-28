@@ -169,8 +169,11 @@ async function updateSerial(serial_number, updates) {
     }
 }
 
-// Function to sell serial numbers
-async function markSerialNumbersAsSold(serialNumbers) {
+async function markSerialNumbersAsSold(data) {
+    
+    const serialNumbers = data.serialNumbers || [];
+    console.log('Received serial numbers:', serialNumbers); // Initial log
+
     if (!serialNumbers.length) {
         throw new Error('No serial numbers provided for update');
     }
@@ -180,6 +183,8 @@ async function markSerialNumbersAsSold(serialNumbers) {
         await connection.beginTransaction();
 
         for (const serial of serialNumbers) {
+            console.log('Processing serial number:', serial); // Log each serial number
+
             // Step 1: Get the part number for the serial number where sold is either 0 or null
             const sqlGetPartNumber = `
               SELECT part_number FROM fouyourb_4yourinventory.serials
@@ -192,6 +197,7 @@ async function markSerialNumbersAsSold(serialNumbers) {
             }
 
             const partNumber = partNumberResults[0].part_number;
+            console.log('Part number found:', partNumber); // Log part number found
 
             // Step 2: Mark the serial number as sold
             const sqlUpdateSerial = `
@@ -223,6 +229,7 @@ async function markSerialNumbersAsSold(serialNumbers) {
         await connection.commit();
         return { updated: true };
     } catch (error) {
+        console.error('Error during transaction:', error.message); // Detailed error log
         // Rollback the transaction in case of an error
         await connection.rollback();
         throw new Error('Database operation failed: ' + error.message);
@@ -230,6 +237,7 @@ async function markSerialNumbersAsSold(serialNumbers) {
         connection.release(); // Release the connection back to the pool
     }
 }
+
 
 
 // MANUFACTURER SEARCH

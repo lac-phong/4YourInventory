@@ -103,11 +103,9 @@ function Search() {
             }
 
             setInput("");
-            alert(`${searchType.charAt(0).toUpperCase() + searchType.slice(1)} deleted successfully`);
             setIsEditing(false);
         } catch (error) {
             console.error(`Failed to delete ${searchType}:`, error);
-            alert(`Failed to delete ${searchType}`);
         }
     };
 
