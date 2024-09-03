@@ -1,8 +1,11 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams } from 'react-router-dom';
 import Search from '../components/Search';
 import '../styles/Inventory.css';
 import 'bootstrap/dist/css/bootstrap.min.css';
+import { quantum } from 'ldrs';
+
+quantum.register()
 
 function Inventory() {
     const { partNumber } = useParams();
@@ -140,19 +143,12 @@ function Inventory() {
 
     if (loading) {
         return (
-            <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                height: '100vh',
-                fontSize: '48px',
-                fontWeight: 'bold',
-                color: 'green'
-            }}>
-                <div className="spinner-border" role="status" style={{ marginRight: '10px' }}>
-                    <span className="sr-only">Loading...</span>
-                </div>
-                LOADING
+            <div style={{ paddingTop: '20%', textAlign: 'center' }}>
+                <l-quantum
+                    size="60"
+                    speed="1.75" 
+                    color="darkgreen" 
+                    ></l-quantum>
             </div>
         );
     }

@@ -88,11 +88,6 @@ function Search() {
             return;
         }
 
-        const confirmed = window.confirm(`Are you sure you want to delete the ${searchType} "${input}"?`);
-        if (!confirmed) {
-            return;
-        }
-
         try {
             if (searchType === "category") {
                 await window.electron.ipcRenderer.invoke('delete-category', input);
