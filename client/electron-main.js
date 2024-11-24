@@ -1,5 +1,5 @@
 // Modules to control application life and create native browser window
-const { app, BrowserWindow, ipcMain } = require("electron");
+const { app, BrowserWindow, ipcMain, shell } = require("electron");
 const path = require("path");
 const qs = require('querystring');
 const xml2js = require('xml2js');
@@ -70,6 +70,11 @@ async function main() {
 
     // Load the app's entry point
     mainWindow.loadFile(path.join(__dirname, 'build', 'index.html'));
+
+    mainWindow.webContents.setWindowOpenHandler(({ url }) => {
+      shell.openExternal(url);  // Open in the system's default browser
+      return { action: 'deny' }; // Prevent Electron from opening it
+    });
     
     // Open the DevTools if needed
     //mainWindow.webContents.openDevTools()
@@ -84,7 +89,13 @@ async function main() {
   // This method will be called when Electron has finished
   // initialization and is ready to create browser windows.
   // Some APIs can only be used after this event occurs.
-  await app.whenReady();
+  app.whenReady().then(() => {
+    createWindow();
+  
+    app.on("activate", function () {
+      if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    });
+  });
     
   createWindow();
 

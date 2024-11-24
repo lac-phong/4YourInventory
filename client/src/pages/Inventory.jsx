@@ -306,8 +306,10 @@ function Inventory() {
                                                 onClick={(e) => {
                                                     e.preventDefault();
                                                     if (window.electron && window.electron.shell) {
+                                                        // Use Electron shell to open the link in the default browser
                                                         window.electron.shell.openExternal(item.itemWebUrl);
                                                     } else {
+                                                        // Fallback for non-Electron environments: open in a new tab
                                                         window.open(item.itemWebUrl, '_blank', 'noopener,noreferrer');
                                                     }
                                                 }}
