@@ -280,49 +280,62 @@ function Inventory() {
                         </table>
                     </form>
                     <div className='mt-4'>
-                        <h3>eBay Listings</h3>
-                        <table className='table table-striped'>
-                            <thead className='thead-dark'>
-                                <tr>
-                                    <th>Title</th>
-                                    <th>Price</th>
-                                    <th>Condition</th>
-                                    <th>Quantity</th>
-                                    <th>Link</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                            {ebayListings.items.map((item, index) => {
-                                console.log(item); // Check the structure of each item
-                                return (
-                                    <tr key={index}>
-                                        <td>{item.title}</td>
-                                        <td>{item.price.value}</td>
-                                        <td>{item.condition}</td>
-                                        <td>{item.quantity}</td>
-                                        <td>
-                                            <a
-                                                href="#"
-                                                onClick={(e) => {
-                                                    e.preventDefault();
-                                                    if (window.electron && window.electron.shell) {
-                                                        // Use Electron shell to open the link in the default browser
-                                                        window.electron.shell.openExternal(item.itemWebUrl);
-                                                    } else {
-                                                        // Fallback for non-Electron environments: open in a new tab
-                                                        window.open(item.itemWebUrl, '_blank', 'noopener,noreferrer');
-                                                    }
-                                                }}
-                                            >
-                                                View Listing
-                                            </a>
-                                        </td>
-                                    </tr>
-                                );
-                            })}
-                            </tbody>
-                        </table>
-                    </div>
+    <h3>eBay Listings</h3>
+    {ebayListings.rateLimit ? (
+        <div className="alert alert-warning">
+            {ebayListings.message || "eBay API rate limit reached. Please try again later."}
+        </div>
+    ) : ebayListings.error ? (
+        <div className="alert alert-danger">
+            Error retrieving eBay listings: {ebayListings.error}
+        </div>
+    ) : ebayListings.items && ebayListings.items.length > 0 ? (
+        <table className='table table-striped'>
+            <thead className='thead-dark'>
+                <tr>
+                    <th>Title</th>
+                    <th>Price</th>
+                    <th>Condition</th>
+                    <th>Quantity</th>
+                    <th>Link</th>
+                </tr>
+            </thead>
+            <tbody>
+                {ebayListings.items.map((item, index) => (
+                    <tr key={index}>
+                        <td>{item.title || 'No title'}</td>
+                        <td>{item.price?.value || 'N/A'}</td>
+                        <td>{item.condition || 'Not specified'}</td>
+                        <td>{item.quantity || 0}</td>
+                        <td>
+                            {item.itemWebUrl ? (
+                                <a
+                                    href="#"
+                                    onClick={(e) => {
+                                        e.preventDefault();
+                                        if (window.electron && window.electron.shell) {
+                                            // Use Electron shell to open the link in the default browser
+                                            window.electron.shell.openExternal(item.itemWebUrl);
+                                        } else {
+                                            // Fallback for non-Electron environments: open in a new tab
+                                            window.open(item.itemWebUrl, '_blank', 'noopener,noreferrer');
+                                        }
+                                    }}
+                                >
+                                    View Listing
+                                </a>
+                            ) : (
+                                'No link available'
+                            )}
+                        </td>
+                    </tr>
+                ))}
+            </tbody>
+        </table>
+    ) : (
+        <p>No eBay listings found for this part.</p>
+    )}
+</div>
 
                     <div className='mb-4'>
                         <label htmlFor='filter'>Filter by Sold Status: </label>

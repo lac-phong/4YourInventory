@@ -211,80 +211,120 @@ async function main() {
     }
   });
 
-  ipcMain.handle('get-ebay-item', async (event, partNumber) => {
-    try {
-      const accessToken = await getEbayAuthToken();
-      const itemSearchHeaders = {
-          'Authorization': `Bearer ${accessToken}`,
-          'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
-      }
-      const storeSearchHeaders = {
-          'X-EBAY-SOA-SECURITY-APPNAME': `${config.EBAY_APP_NAME}`,
-          'X-EBAY-SOA-OPERATION-NAME': 'findItemsIneBayStores',
-          'Content-Type': 'text/xml'
-      };
-      
-      const storeSearchBody = `<?xml version="1.0" encoding="UTF-8"?>
-      <findItemsIneBayStoresRequest xmlns="http://www.ebay.com/marketplace/search/v1/services">
-        <keywords>${partNumber}</keywords>
-        <storeName>4YourBusiness</storeName>
-        <outputSelector>StoreInfo</outputSelector>
-      </findItemsIneBayStoresRequest>`;
-      
-      const response = await fetch(`https://svcs.ebay.com/services/search/FindingService/v1`, {
-          method: 'POST',
-          headers: storeSearchHeaders,
-          body: storeSearchBody
-      });
-
-      const storeSearchText = await response.text();
-      const parser = new xml2js.Parser({ explicitArray: false });
-      const storeSearch = await parser.parseStringPromise(storeSearchText);
-
-      let itemIds = [];
-      if (storeSearch.findItemsIneBayStoresResponse.searchResult.item) {
-          itemIds = Array.isArray(storeSearch.findItemsIneBayStoresResponse.searchResult.item)
-              ? storeSearch.findItemsIneBayStoresResponse.searchResult.item.map(item => item.itemId)
-              : [storeSearch.findItemsIneBayStoresResponse.searchResult.item.itemId];
-      }
-
-      const fetchItemDetails = async (itemId) => {
-          try {
-              const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/v1|${itemId}|0`, {
-                  headers: itemSearchHeaders
-              });
-              const itemJson = await itemDetails.json();
-              return {
-                  itemId: itemId,
-                  title: itemJson.title,
-                  price: itemJson.price,
-                  condition: itemJson.condition,
-                  quantity: itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity,
-                  itemWebUrl: itemJson.itemWebUrl
-              };
-          } catch (error) {
-              console.error(`Error fetching details for item ${itemId}:`, error);
-              return {
-                  itemId: itemId,
-                  quantity: 0,
-                  error: 'Failed to fetch item details'
-              };
-          }
-      };
-
-      const results = await Promise.all(itemIds.map(fetchItemDetails));
-
-      const totalQuantity = results.reduce((sum, item) => sum + (item.quantity || 0), 0);
-
-      return {
-          items: results,
-          totalQuantity: totalQuantity
-      };
-    } catch (error) {
-        console.error('Error in get-ebay-item:', error);
-        throw error;  // This will be caught by the IPC handler
+  // Replace the existing get-ebay-item handler with this fixed version
+ipcMain.handle('get-ebay-item', async (event, partNumber) => {
+  try {
+    const accessToken = await getEbayAuthToken();
+    const itemSearchHeaders = {
+      'Authorization': `Bearer ${accessToken}`,
+      'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
     }
-  });
+    const storeSearchHeaders = {
+      'X-EBAY-SOA-SECURITY-APPNAME': `${config.EBAY_APP_NAME}`,
+      'X-EBAY-SOA-OPERATION-NAME': 'findItemsIneBayStores',
+      'Content-Type': 'text/xml'
+    };
+    
+    const storeSearchBody = `<?xml version="1.0" encoding="UTF-8"?>
+    <findItemsIneBayStoresRequest xmlns="http://www.ebay.com/marketplace/search/v1/services">
+      <keywords>${partNumber}</keywords>
+      <storeName>4YourBusiness</storeName>
+      <outputSelector>StoreInfo</outputSelector>
+    </findItemsIneBayStoresRequest>`;
+    
+    const response = await fetch(`https://svcs.ebay.com/services/search/FindingService/v1`, {
+      method: 'POST',
+      headers: storeSearchHeaders,
+      body: storeSearchBody
+    });
+
+    const storeSearchText = await response.text();
+    console.log('eBay API Response:', storeSearchText); // Log the raw response for debugging
+    
+    const parser = new xml2js.Parser({ explicitArray: false });
+    const storeSearch = await parser.parseStringPromise(storeSearchText);
+    
+    console.log('Parsed eBay Response:', JSON.stringify(storeSearch, null, 2)); // Log the parsed response
+
+    let itemIds = [];
+    
+    // Handle different response structures safely
+    if (storeSearch.findItemsIneBayStoresResponse && 
+        storeSearch.findItemsIneBayStoresResponse.searchResult) {
+      
+      const searchResult = storeSearch.findItemsIneBayStoresResponse.searchResult;
+      
+      // Check if there are items
+      if (searchResult.item) {
+        itemIds = Array.isArray(searchResult.item)
+          ? searchResult.item.map(item => item.itemId)
+          : [searchResult.item.itemId];
+      }
+    } else {
+      console.log('No search results or unexpected response structure from eBay API');
+    }
+
+    // If no items found, return empty results
+    if (itemIds.length === 0) {
+      return {
+        items: [],
+        totalQuantity: 0
+      };
+    }
+
+    const fetchItemDetails = async (itemId) => {
+      try {
+        const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/v1|${itemId}|0`, {
+          headers: itemSearchHeaders
+        });
+        
+        if (!itemDetails.ok) {
+          console.error(`Error fetching details for item ${itemId}: ${itemDetails.status} ${itemDetails.statusText}`);
+          return {
+            itemId: itemId,
+            quantity: 0,
+            error: `Failed to fetch item details: ${itemDetails.status}`
+          };
+        }
+        
+        const itemJson = await itemDetails.json();
+        return {
+          itemId: itemId,
+          title: itemJson.title || 'No title',
+          price: itemJson.price || { value: 0, currency: 'USD' },
+          condition: itemJson.condition || 'Unknown',
+          quantity: itemJson.estimatedAvailabilities && 
+                   itemJson.estimatedAvailabilities[0] ? 
+                   itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity : 0,
+          itemWebUrl: itemJson.itemWebUrl || '#'
+        };
+      } catch (error) {
+        console.error(`Error fetching details for item ${itemId}:`, error);
+        return {
+          itemId: itemId,
+          quantity: 0,
+          error: 'Failed to fetch item details'
+        };
+      }
+    };
+
+    const results = await Promise.all(itemIds.map(fetchItemDetails));
+    const totalQuantity = results.reduce((sum, item) => sum + (item.quantity || 0), 0);
+
+    return {
+      items: results,
+      totalQuantity: totalQuantity
+    };
+  } catch (error) {
+    console.error('Error in get-ebay-item:', error);
+    // Return empty results instead of throwing, which causes the UI to break
+    return {
+      items: [],
+      totalQuantity: 0,
+      error: error.message
+    };
+  }
+});
 
   ipcMain.handle('get-all-categories', async () => {
     try {
@@ -333,6 +373,7 @@ async function main() {
         throw error;
     }
   });
+
 }
 
 main().catch(console.error);
