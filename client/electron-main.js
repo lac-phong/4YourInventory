@@ -96,8 +96,6 @@ async function main() {
       if (BrowserWindow.getAllWindows().length === 0) createWindow();
     });
   });
-    
-  createWindow();
 
   app.on("activate", function () {
     if (BrowserWindow.getAllWindows().length === 0) createWindow();
@@ -211,120 +209,145 @@ async function main() {
     }
   });
 
-  // Replace the existing get-ebay-item handler with this fixed version
-ipcMain.handle('get-ebay-item', async (event, partNumber) => {
-  try {
-    const accessToken = await getEbayAuthToken();
-    const itemSearchHeaders = {
-      'Authorization': `Bearer ${accessToken}`,
-      'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
-    }
-    const storeSearchHeaders = {
-      'X-EBAY-SOA-SECURITY-APPNAME': `${config.EBAY_APP_NAME}`,
-      'X-EBAY-SOA-OPERATION-NAME': 'findItemsIneBayStores',
-      'Content-Type': 'text/xml'
-    };
-    
-    const storeSearchBody = `<?xml version="1.0" encoding="UTF-8"?>
-    <findItemsIneBayStoresRequest xmlns="http://www.ebay.com/marketplace/search/v1/services">
-      <keywords>${partNumber}</keywords>
-      <storeName>4YourBusiness</storeName>
-      <outputSelector>StoreInfo</outputSelector>
-    </findItemsIneBayStoresRequest>`;
-    
-    const response = await fetch(`https://svcs.ebay.com/services/search/FindingService/v1`, {
-      method: 'POST',
-      headers: storeSearchHeaders,
-      body: storeSearchBody
-    });
-
-    const storeSearchText = await response.text();
-    console.log('eBay API Response:', storeSearchText); // Log the raw response for debugging
-    
-    const parser = new xml2js.Parser({ explicitArray: false });
-    const storeSearch = await parser.parseStringPromise(storeSearchText);
-    
-    console.log('Parsed eBay Response:', JSON.stringify(storeSearch, null, 2)); // Log the parsed response
-
-    let itemIds = [];
-    
-    // Handle different response structures safely
-    if (storeSearch.findItemsIneBayStoresResponse && 
-        storeSearch.findItemsIneBayStoresResponse.searchResult) {
+  ipcMain.handle('get-ebay-item', async (event, partNumber) => {
+    try {
+      const accessToken = await getEbayAuthToken();
       
-      const searchResult = storeSearch.findItemsIneBayStoresResponse.searchResult;
-      
-      // Check if there are items
-      if (searchResult.item) {
-        itemIds = Array.isArray(searchResult.item)
-          ? searchResult.item.map(item => item.itemId)
-          : [searchResult.item.itemId];
+      // Use the Browse API's search endpoint
+      const searchResponse = await fetch(`https://api.ebay.com/buy/browse/v1/item_summary/search?q=${encodeURIComponent(partNumber)}&filter=sellers:{4YourBusiness}`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`,
+          'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US',
+          'Content-Type': 'application/json'
+        }
+      });
+  
+      if (!searchResponse.ok) {
+        console.error(`eBay search error: ${searchResponse.status} ${searchResponse.statusText}`);
+        return { items: [], totalQuantity: 0, error: 'Search failed' };
       }
-    } else {
-      console.log('No search results or unexpected response structure from eBay API');
-    }
-
-    // If no items found, return empty results
-    if (itemIds.length === 0) {
-      return {
-        items: [],
-        totalQuantity: 0
-      };
-    }
-
-    const fetchItemDetails = async (itemId) => {
-      try {
-        const itemDetails = await fetch(`https://api.ebay.com/buy/browse/v1/item/v1|${itemId}|0`, {
-          headers: itemSearchHeaders
-        });
+  
+      const searchData = await searchResponse.json();
+      console.log('eBay API Search Response:', JSON.stringify(searchData, null, 2));
+  
+      if (!searchData.itemSummaries || searchData.itemSummaries.length === 0) {
+        return { items: [], totalQuantity: 0 };
+      }
+  
+      // For debugging - log the first item's complete structure
+      if (searchData.itemSummaries[0]) {
+        console.log('First item complete structure:', JSON.stringify(searchData.itemSummaries[0], null, 2));
+      }
+  
+      // Map the results with improved quantity extraction
+      const items = searchData.itemSummaries.map(item => {
+        let quantity = 1; // Default to 1 for any active listing
         
-        if (!itemDetails.ok) {
-          console.error(`Error fetching details for item ${itemId}: ${itemDetails.status} ${itemDetails.statusText}`);
-          return {
-            itemId: itemId,
-            quantity: 0,
-            error: `Failed to fetch item details: ${itemDetails.status}`
-          };
+        // Log availability info for debugging
+        if (item.estimatedAvailabilities) {
+          console.log('Availability info:', JSON.stringify(item.estimatedAvailabilities, null, 2));
         }
         
-        const itemJson = await itemDetails.json();
-        return {
-          itemId: itemId,
-          title: itemJson.title || 'No title',
-          price: itemJson.price || { value: 0, currency: 'USD' },
-          condition: itemJson.condition || 'Unknown',
-          quantity: itemJson.estimatedAvailabilities && 
-                   itemJson.estimatedAvailabilities[0] ? 
-                   itemJson.estimatedAvailabilities[0].estimatedAvailableQuantity : 0,
-          itemWebUrl: itemJson.itemWebUrl || '#'
+        // Try multiple approaches to get the correct quantity
+        if (item.estimatedAvailabilities && item.estimatedAvailabilities.length > 0) {
+          const availInfo = item.estimatedAvailabilities[0];
+          
+          // Check for estimatedAvailableQuantity
+          if (availInfo.estimatedAvailableQuantity) {
+            quantity = parseInt(availInfo.estimatedAvailableQuantity) || 1;
+          }
+          
+          // Also check for availabilityThreshold which might contain the "10 available" info
+          if (availInfo.availabilityThreshold) {
+            quantity = parseInt(availInfo.availabilityThreshold) || quantity;
+          }
+          
+          // Check for estimatedSoldQuantity and totalQuantity if available
+          if (item.estimatedSoldQuantity && item.totalQuantity) {
+            const totalQty = parseInt(item.totalQuantity);
+            const soldQty = parseInt(item.estimatedSoldQuantity);
+            if (!isNaN(totalQty) && !isNaN(soldQty)) {
+              quantity = totalQty - soldQty;
+            }
+          }
+        }
+        
+        // For multi-variation listings
+        if (item.availableQuantity) {
+          quantity = parseInt(item.availableQuantity) || quantity;
+        }
+        
+        // Directly try to get the quantity
+        if (item.quantity) {
+          quantity = parseInt(item.quantity) || quantity;
+        }
+        
+        // If we have an item web URL, also fetch the full item details to get more accurate quantity
+        const itemDetails = {
+          itemId: item.itemId,
+          title: item.title || 'No title',
+          price: item.price || { value: 0, currency: 'USD' },
+          condition: item.condition || 'Unknown',
+          quantity: quantity,
+          itemWebUrl: item.itemWebUrl || '#'
         };
-      } catch (error) {
-        console.error(`Error fetching details for item ${itemId}:`, error);
-        return {
-          itemId: itemId,
-          quantity: 0,
-          error: 'Failed to fetch item details'
-        };
-      }
-    };
-
-    const results = await Promise.all(itemIds.map(fetchItemDetails));
-    const totalQuantity = results.reduce((sum, item) => sum + (item.quantity || 0), 0);
-
-    return {
-      items: results,
-      totalQuantity: totalQuantity
-    };
-  } catch (error) {
-    console.error('Error in get-ebay-item:', error);
-    // Return empty results instead of throwing, which causes the UI to break
-    return {
-      items: [],
-      totalQuantity: 0,
-      error: error.message
-    };
-  }
-});
+        
+        return itemDetails;
+      });
+  
+      // After getting initial details, now get full item details for each item
+      const enhancedItems = await Promise.all(items.map(async (item) => {
+        if (item.itemId) {
+          try {
+            // Get full item details from the item endpoint
+            const itemResponse = await fetch(`https://api.ebay.com/buy/browse/v1/item/${item.itemId}`, {
+              headers: {
+                'Authorization': `Bearer ${accessToken}`,
+                'X-EBAY-C-MARKETPLACE-ID': 'EBAY_US'
+              }
+            });
+            
+            if (itemResponse.ok) {
+              const fullItemData = await itemResponse.json();
+              console.log('Full item data:', JSON.stringify(fullItemData, null, 2));
+              
+              // Try to extract the quantity from the full item data
+              if (fullItemData.estimatedAvailabilities && fullItemData.estimatedAvailabilities.length > 0) {
+                const fullAvailInfo = fullItemData.estimatedAvailabilities[0];
+                
+                if (fullAvailInfo.estimatedAvailableQuantity) {
+                  item.quantity = parseInt(fullAvailInfo.estimatedAvailableQuantity) || item.quantity;
+                }
+                
+                // Check for more availability info
+                if (fullAvailInfo.availabilityThreshold) {
+                  item.quantity = parseInt(fullAvailInfo.availabilityThreshold) || item.quantity;
+                }
+              }
+            }
+          } catch (error) {
+            console.error(`Error getting full item details for ${item.itemId}:`, error);
+          }
+        }
+        return item;
+      }));
+  
+      // Calculate the total quantity from all listings
+      const totalQuantity = enhancedItems.reduce((sum, item) => sum + (parseInt(item.quantity) || 0), 0);
+  
+      return {
+        items: enhancedItems,
+        totalQuantity: totalQuantity
+      };
+    } catch (error) {
+      console.error('Error in get-ebay-item:', error);
+      return {
+        items: [],
+        totalQuantity: 0,
+        error: error.message
+      };
+    }
+  });
 
   ipcMain.handle('get-all-categories', async () => {
     try {
